@@ -48,6 +48,7 @@ function AnnotationPoint({ annotation }: { annotation: Annotation }) {
               pointerEvents: 'none',
               boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
               position: 'relative',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
             }}
           >
             {/* Nazwa PL */}
