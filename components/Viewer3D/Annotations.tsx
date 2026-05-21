@@ -64,7 +64,7 @@ function AnnotationPoint({ annotation }: { annotation: Annotation }) {
             )}
 
             {/* Separator */}
-            {(annotation.nameLAT || annotation.description) && (
+            {(annotation.nameLAT && annotation.description) && (
               <hr style={{ border: 'none', borderTop: '1px solid #2d1b69', margin: '6px 0' }} />
             )}
 
@@ -76,17 +76,32 @@ function AnnotationPoint({ annotation }: { annotation: Annotation }) {
             )}
 
             {/* Strzałka wskazująca na punkt */}
+            {/* Outer arrow (border color) */}
             <div
               style={{
                 position: 'absolute',
-                bottom: '-6px',
+                bottom: '-7px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 0,
+                height: 0,
+                borderLeft: '6px solid transparent',
+                borderRight: '6px solid transparent',
+                borderTop: '7px solid #7c3aed',
+              }}
+            />
+            {/* Inner arrow (background color, masks border seam) */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '-5px',
                 left: '50%',
                 transform: 'translateX(-50%)',
                 width: 0,
                 height: 0,
                 borderLeft: '5px solid transparent',
                 borderRight: '5px solid transparent',
-                borderTop: '6px solid #7c3aed',
+                borderTop: '6px solid #1e1b4b',
               }}
             />
           </div>
