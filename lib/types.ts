@@ -4,6 +4,8 @@
 export interface Annotation {
   id: string
   label: string
+  nameLAT?: string
+  description?: string
   /** Pozycja XYZ w przestrzeni Three.js */
   position: [number, number, number]
   structureId: string
