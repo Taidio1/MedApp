@@ -29,6 +29,31 @@ export const anatomyTree: AnatomyNode[] = [
       { id: 'naczynia', label: 'Naczynia krwionośne', structureId: 'naczynia' },
     ],
   },
+  {
+    id: 'oddechowy',
+    label: 'Układ Oddechowy',
+    icon: '🫁',
+    children: [
+      { id: 'lung', label: 'Płuco', structureId: 'lung' },
+    ],
+  },
+  {
+    id: 'pokarmowy',
+    label: 'Układ Pokarmowy',
+    icon: '🫃',
+    children: [
+      { id: 'stomach', label: 'Żołądek', structureId: 'stomach' },
+      { id: 'liver', label: 'Wątroba', structureId: 'liver' },
+    ],
+  },
+  {
+    id: 'moczowy',
+    label: 'Układ Moczowy',
+    icon: '🫘',
+    children: [
+      { id: 'kidney', label: 'Nerka', structureId: 'kidney' },
+    ],
+  },
 ]
 
 /** Słownik wszystkich struktur anatomicznych */
@@ -165,6 +190,50 @@ export const structures: Record<string, AnatomicalStructure> = {
       'Sieć naczyń transportujących krew: tętnice (od serca), żyły (do serca) i naczynia włosowate (wymiana substancji z tkankami).',
     biologicalNotes:
       'Łączna długość naczyń w organizmie: ~100 000 km. Aorta — największa tętnica, Ø ~25 mm. Kapilary — Ø 5–10 μm, wymiana gazowa.',
+    annotations: [],
+  },
+  lung: {
+    id: 'lung',
+    namePL: 'Płuco',
+    nameLAT: 'Pulmo',
+    system: 'Układ Oddechowy',
+    description:
+      'Narząd parzysty odpowiedzialny za wymianę gazową — pobieranie tlenu i usuwanie dwutlenku węgla z krwi. Leży w klatce piersiowej, po obu stronach serca.',
+    biologicalNotes:
+      'Płuco prawe: 3 płaty. Płuco lewe: 2 płaty (miejsce na serce). Powierzchnia wymiany gazowej: ~70 m². Pojemność życiowa: ~4–6 l.',
+    annotations: [],
+  },
+  stomach: {
+    id: 'stomach',
+    namePL: 'Żołądek',
+    nameLAT: 'Gaster',
+    system: 'Układ Pokarmowy',
+    description:
+      'Workowy narząd mięśniowy łączący przełyk z jelitem cienkim. Miesza pokarm z sokiem żołądkowym i wstępnie trawi białka.',
+    biologicalNotes:
+      'Pojemność: 1–1,5 l. pH soku żołądkowego: 1,5–3,5. Produkuje pepsynę (trawienie białek) i lipazę (trawienie tłuszczów). Czas pasażu: 2–6 h.',
+    annotations: [],
+  },
+  liver: {
+    id: 'liver',
+    namePL: 'Wątroba',
+    nameLAT: 'Hepar',
+    system: 'Układ Pokarmowy',
+    description:
+      'Największy gruczoł w organizmie człowieka. Pełni ponad 500 funkcji metabolicznych: detoksykacja, produkcja żółci, synteza białek osocza, magazynowanie glikogenu.',
+    biologicalNotes:
+      'Masa: ~1500 g. 2 płaty: prawy (większy) i lewy. Zaopatrzona przez żyłę wrotną (krew z jelit) i tętnicę wątrobową. Zdolna do regeneracji.',
+    annotations: [],
+  },
+  kidney: {
+    id: 'kidney',
+    namePL: 'Nerka',
+    nameLAT: 'Ren',
+    system: 'Układ Moczowy',
+    description:
+      'Narząd parzysty filtrujący krew i produkujący mocz. Reguluje gospodarkę wodno-elektrolitową, ciśnienie krwi i równowagę kwasowo-zasadową.',
+    biologicalNotes:
+      'Masa: ~150 g. Filtruje ~180 l osocza/dobę, produkuje ~1,5 l moczu. Jednostka funkcjonalna: nefron (~1 mln/nerkę). Hormon: erytropoetyna (EPO).',
     annotations: [],
   },
 }

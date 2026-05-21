@@ -71,6 +71,10 @@ STRUCTURES: list[StructureInfo] = [
     StructureInfo(id="rdzen-kregowy", namePL="Rdzeń kręgowy", nameLAT="Medulla spinalis", system="OUN"),
     StructureInfo(id="serce", namePL="Serce", nameLAT="Cor", system="Układ Krążenia"),
     StructureInfo(id="naczynia", namePL="Naczynia krwionośne", nameLAT="Vasa sanguinea", system="Układ Krążenia"),
+    StructureInfo(id="lung", namePL="Płuco", nameLAT="Pulmo", system="Układ Oddechowy"),
+    StructureInfo(id="stomach", namePL="Żołądek", nameLAT="Gaster", system="Układ Pokarmowy"),
+    StructureInfo(id="liver", namePL="Wątroba", nameLAT="Hepar", system="Układ Pokarmowy"),
+    StructureInfo(id="kidney", namePL="Nerka", nameLAT="Ren", system="Układ Moczowy"),
 ]
 
 
