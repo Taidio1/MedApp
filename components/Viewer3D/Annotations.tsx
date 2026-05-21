@@ -39,17 +39,55 @@ function AnnotationPoint({ annotation }: { annotation: Annotation }) {
         <Html distanceFactor={10} zIndexRange={[100, 0]}>
           <div
             style={{
-              background: 'rgba(0,0,0,0.85)',
-              color: 'white',
-              fontSize: '11px',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              whiteSpace: 'nowrap',
-              border: '1px solid rgba(124,58,237,0.5)',
+              background: '#1e1b4b',
+              border: '1px solid #7c3aed',
+              borderRadius: '10px',
+              padding: '10px 14px',
+              maxWidth: '220px',
+              whiteSpace: 'normal',
               pointerEvents: 'none',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
+              position: 'relative',
             }}
           >
-            {annotation.label}
+            {/* Nazwa PL */}
+            <div style={{ fontWeight: 700, color: '#a78bfa', fontSize: '13px' }}>
+              {annotation.label}
+            </div>
+
+            {/* Nazwa łacińska */}
+            {annotation.nameLAT && (
+              <div style={{ fontStyle: 'italic', color: '#818cf8', fontSize: '10px', marginTop: '2px' }}>
+                {annotation.nameLAT}
+              </div>
+            )}
+
+            {/* Separator */}
+            {(annotation.nameLAT || annotation.description) && (
+              <hr style={{ border: 'none', borderTop: '1px solid #2d1b69', margin: '6px 0' }} />
+            )}
+
+            {/* Opis */}
+            {annotation.description && (
+              <div style={{ color: '#c4b5fd', fontSize: '11px', lineHeight: '1.5' }}>
+                {annotation.description}
+              </div>
+            )}
+
+            {/* Strzałka wskazująca na punkt */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: '-6px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 0,
+                height: 0,
+                borderLeft: '5px solid transparent',
+                borderRight: '5px solid transparent',
+                borderTop: '6px solid #7c3aed',
+              }}
+            />
           </div>
         </Html>
       )}

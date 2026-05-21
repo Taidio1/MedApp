@@ -144,7 +144,14 @@ export const structures: Record<string, AnatomicalStructure> = {
     biologicalNotes:
       'Masa: 250–350 g. 4 jamy: 2 przedsionki + 2 komory. Układ bodźco-przewodzący: węzeł SA (rozrusznik) → węzeł AV → pęczek Hisa → włókna Purkiniego.',
     annotations: [
-      { id: 'ann-serce-1', label: 'Komora lewa', position: [-0.5, 0, 0.5], structureId: 'serce' },
+      {
+        id: 'ann-serce-1',
+        label: 'Komora lewa',
+        nameLAT: 'Ventriculus sinister',
+        description: 'Pompuje krew do krążenia ogólnoustrojowego przez aortę. Największa jama serca.',
+        position: [-0.5, 0, 0.5],
+        structureId: 'serce'
+      },
       { id: 'ann-serce-2', label: 'Zastawka mitralna', position: [-0.3, 0.5, 0.3], structureId: 'serce' },
       { id: 'ann-serce-3', label: 'Aorta', position: [0, 1.2, 0], structureId: 'serce' },
     ],
