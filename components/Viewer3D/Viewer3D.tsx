@@ -215,6 +215,36 @@ function SliderRow({
 
 // ─── WASD ─────────────────────────────────────────────────────────────────────
 
+function AnnotationDetailPanel() {
+  const activeAnnotation = useAppStore((state) => state.activeAnnotation)
+
+  if (!activeAnnotation) return null
+
+  return (
+    <aside
+      className="absolute right-4 top-[86px] z-10 w-[260px] rounded-lg border border-[#7c3aed]/50 bg-[#f8f5ef] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.28)]"
+      aria-live="polite"
+    >
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-[#7c3aed]">
+        Aktywny punkt
+      </p>
+      <h2 className="mt-2 text-base font-bold leading-tight text-[#111827]">
+        {activeAnnotation.label}
+      </h2>
+      {activeAnnotation.nameLAT && (
+        <p className="mt-1 text-xs italic text-[#6d28d9]">
+          {activeAnnotation.nameLAT}
+        </p>
+      )}
+      {activeAnnotation.description && (
+        <p className="mt-3 text-xs leading-relaxed text-[#4b5563]">
+          {activeAnnotation.description}
+        </p>
+      )}
+    </aside>
+  )
+}
+
 function WASDControls() {
   const { camera } = useThree()
   const keys = useRef(new Set<string>())
@@ -287,6 +317,8 @@ export function Viewer3D() {
       {hasLayers && selectedStructure?.layers && (
         <LayerPanel layers={selectedStructure.layers} />
       )}
+
+      <AnnotationDetailPanel />
 
       {!modelUrl && (
         <div

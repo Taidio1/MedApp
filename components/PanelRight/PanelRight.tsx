@@ -227,7 +227,7 @@ export function PanelRight() {
               </p>
             </InfoSection>
 
-            <InfoSection label="Biological Notes">
+            <InfoSection label="Notatki biologiczne">
               <div
                 style={{
                   fontSize: '12px',
@@ -244,7 +244,7 @@ export function PanelRight() {
               </div>
             </InfoSection>
 
-            <InfoSection label="Where It Occurs">
+            <InfoSection label="Kontekst w bazie wiedzy">
               <div
                 style={{
                   fontSize: '12px',

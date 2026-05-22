@@ -1,7 +1,8 @@
 'use client'
 
 import { useGLTF } from '@react-three/drei'
-import { Component, ReactNode } from 'react'
+import { Component, ReactNode, useMemo } from 'react'
+import * as THREE from 'three'
 
 // ErrorBoundary do obsługi braku pliku .glb
 class ModelErrorBoundary extends Component<
@@ -54,7 +55,26 @@ export function PlaceholderMesh() {
 // Komponent ładujący model .glb
 function GLBModel({ url }: { url: string }) {
   const { scene } = useGLTF(url)
-  return <primitive object={scene} />
+  const normalizedScene = useMemo(() => {
+    const model = scene.clone(true)
+    const box = new THREE.Box3().setFromObject(model)
+    const size = new THREE.Vector3()
+    const center = new THREE.Vector3()
+
+    box.getSize(size)
+    box.getCenter(center)
+
+    const maxDimension = Math.max(size.x, size.y, size.z)
+    if (Number.isFinite(maxDimension) && maxDimension > 0) {
+      const scale = 2.8 / maxDimension
+      model.scale.setScalar(scale)
+      model.position.set(-center.x * scale, -center.y * scale, -center.z * scale)
+    }
+
+    return model
+  }, [scene])
+
+  return <primitive object={normalizedScene} />
 }
 
 interface ModelLoaderProps {

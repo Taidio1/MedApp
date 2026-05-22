@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "verify:learning-data": "node scripts/verify-learning-data.mjs",
+    "verify:annotation-panel": "node scripts/verify-stable-annotation-panel.mjs",
     "start": "next start"
   },
   "dependencies": {

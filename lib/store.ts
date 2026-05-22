@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { AnatomicalStructure, ChatMessage } from './types'
+import { AnatomicalStructure, Annotation, ChatMessage } from './types'
 
 interface AppState {
   // Aktualnie wybrana struktura anatomiczna
@@ -22,6 +22,10 @@ interface AppState {
   // Auto-rotacja modelu 3D
   autoRotate: boolean
   setAutoRotate: (rotate: boolean) => void
+
+  // Anotacja aktywowana przez hover na punkcie 3D
+  activeAnnotation: Annotation | null
+  setActiveAnnotation: (annotation: Annotation | null) => void
 
   // Widoczność warstw: meshId → czy widoczny
   layerVisibility: Record<string, boolean>
@@ -47,6 +51,7 @@ export const useAppStore = create<AppState>((set) => ({
     set({
       selectedStructure: structure,
       chatMessages: [],
+      activeAnnotation: null,
       layerVisibility: {},
       explodeAmount: 0,
       clippingPlaneY: null,
@@ -67,6 +72,9 @@ export const useAppStore = create<AppState>((set) => ({
 
   autoRotate: false,
   setAutoRotate: (rotate) => set({ autoRotate: rotate }),
+
+  activeAnnotation: null,
+  setActiveAnnotation: (annotation) => set({ activeAnnotation: annotation }),
 
   layerVisibility: {},
   setLayerVisibility: (meshId, visible) =>

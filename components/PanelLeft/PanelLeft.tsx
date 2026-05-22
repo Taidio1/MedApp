@@ -44,7 +44,9 @@ function TreeNode({ node, depth = 0 }: { node: AnatomyNode; depth?: number }) {
 
         {/* Emoji ikony dla układów najwyższego poziomu */}
         {node.icon && (
-          <span className="text-base leading-none">{node.icon}</span>
+          <span className="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-[#2a2a4e] text-[11px] font-bold leading-none text-[#c4b5fd]">
+            {node.icon}
+          </span>
         )}
 
         <span className="truncate">{node.label}</span>

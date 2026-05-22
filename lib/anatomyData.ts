@@ -23,7 +23,7 @@ export const anatomyTree: AnatomyNode[] = [
   {
     id: 'krazenie',
     label: 'Układ Krążenia',
-    icon: '🫀',
+    icon: '♥',
     children: [
       { id: 'serce', label: 'Serce', structureId: 'serce' },
       { id: 'naczynia', label: 'Naczynia krwionośne', structureId: 'naczynia' },
@@ -32,7 +32,7 @@ export const anatomyTree: AnatomyNode[] = [
   {
     id: 'oddechowy',
     label: 'Układ Oddechowy',
-    icon: '🫁',
+    icon: 'O₂',
     children: [
       { id: 'lung', label: 'Płuco', structureId: 'lung' },
     ],
@@ -40,7 +40,7 @@ export const anatomyTree: AnatomyNode[] = [
   {
     id: 'pokarmowy',
     label: 'Układ Pokarmowy',
-    icon: '🫃',
+    icon: 'GI',
     children: [
       { id: 'stomach', label: 'Żołądek', structureId: 'stomach' },
       { id: 'liver', label: 'Wątroba', structureId: 'liver' },
@@ -49,7 +49,7 @@ export const anatomyTree: AnatomyNode[] = [
   {
     id: 'moczowy',
     label: 'Układ Moczowy',
-    icon: '🫘',
+    icon: 'N',
     children: [
       { id: 'kidney', label: 'Nerka', structureId: 'kidney' },
     ],
@@ -201,7 +201,32 @@ export const structures: Record<string, AnatomicalStructure> = {
       'Narząd parzysty odpowiedzialny za wymianę gazową — pobieranie tlenu i usuwanie dwutlenku węgla z krwi. Leży w klatce piersiowej, po obu stronach serca.',
     biologicalNotes:
       'Płuco prawe: 3 płaty. Płuco lewe: 2 płaty (miejsce na serce). Powierzchnia wymiany gazowej: ~70 m². Pojemność życiowa: ~4–6 l.',
-    annotations: [],
+    annotations: [
+      {
+        id: 'ann-lung-1',
+        label: 'Oskrzele główne',
+        nameLAT: 'Bronchus principalis',
+        description: 'Doprowadza powietrze do płuca i rozgałęzia się na oskrzela płatowe oraz segmentowe.',
+        position: [0, 0.45, 0.55],
+        structureId: 'lung',
+      },
+      {
+        id: 'ann-lung-2',
+        label: 'Płat górny',
+        nameLAT: 'Lobus superior',
+        description: 'Górna część płuca wentylowana przez oskrzele płatowe górne; ważny punkt orientacyjny w badaniu obrazowym.',
+        position: [-0.55, 0.95, 0.2],
+        structureId: 'lung',
+      },
+      {
+        id: 'ann-lung-3',
+        label: 'Podstawa płuca',
+        nameLAT: 'Basis pulmonis',
+        description: 'Dolna powierzchnia płuca spoczywająca na przeponie; porusza się wraz z oddechem.',
+        position: [0.35, -0.9, 0.15],
+        structureId: 'lung',
+      },
+    ],
   },
   stomach: {
     id: 'stomach',
@@ -212,7 +237,32 @@ export const structures: Record<string, AnatomicalStructure> = {
       'Workowy narząd mięśniowy łączący przełyk z jelitem cienkim. Miesza pokarm z sokiem żołądkowym i wstępnie trawi białka.',
     biologicalNotes:
       'Pojemność: 1–1,5 l. pH soku żołądkowego: 1,5–3,5. Produkuje pepsynę (trawienie białek) i lipazę (trawienie tłuszczów). Czas pasażu: 2–6 h.',
-    annotations: [],
+    annotations: [
+      {
+        id: 'ann-stomach-1',
+        label: 'Wpust',
+        nameLAT: 'Cardia',
+        description: 'Miejsce przejścia przełyku w żołądek; okolica istotna przy refluksie żołądkowo-przełykowym.',
+        position: [-0.7, 0.45, 0.35],
+        structureId: 'stomach',
+      },
+      {
+        id: 'ann-stomach-2',
+        label: 'Dno żołądka',
+        nameLAT: 'Fundus gastricus',
+        description: 'Górna kopuła żołądka magazynująca powietrze i treść pokarmową po posiłku.',
+        position: [-0.25, 0.9, 0.2],
+        structureId: 'stomach',
+      },
+      {
+        id: 'ann-stomach-3',
+        label: 'Odźwiernik',
+        nameLAT: 'Pylorus',
+        description: 'Kontroluje przechodzenie treści żołądkowej do dwunastnicy dzięki mięśniowi zwieraczowi.',
+        position: [0.95, -0.35, 0.25],
+        structureId: 'stomach',
+      },
+    ],
   },
   liver: {
     id: 'liver',
@@ -223,7 +273,32 @@ export const structures: Record<string, AnatomicalStructure> = {
       'Największy gruczoł w organizmie człowieka. Pełni ponad 500 funkcji metabolicznych: detoksykacja, produkcja żółci, synteza białek osocza, magazynowanie glikogenu.',
     biologicalNotes:
       'Masa: ~1500 g. 2 płaty: prawy (większy) i lewy. Zaopatrzona przez żyłę wrotną (krew z jelit) i tętnicę wątrobową. Zdolna do regeneracji.',
-    annotations: [],
+    annotations: [
+      {
+        id: 'ann-liver-1',
+        label: 'Płat prawy',
+        nameLAT: 'Lobus dexter hepatis',
+        description: 'Największa część wątroby; dominuje objętościowo i jest częstym punktem odniesienia w USG.',
+        position: [0.55, 0.25, 0.35],
+        structureId: 'liver',
+      },
+      {
+        id: 'ann-liver-2',
+        label: 'Płat lewy',
+        nameLAT: 'Lobus sinister hepatis',
+        description: 'Mniejszy płat wątroby położony bardziej ku lewej stronie, częściowo nad żołądkiem.',
+        position: [-0.85, 0.15, 0.25],
+        structureId: 'liver',
+      },
+      {
+        id: 'ann-liver-3',
+        label: 'Wrota wątroby',
+        nameLAT: 'Porta hepatis',
+        description: 'Miejsce wejścia żyły wrotnej i tętnicy wątrobowej oraz wyjścia przewodów żółciowych.',
+        position: [0, -0.35, 0.6],
+        structureId: 'liver',
+      },
+    ],
   },
   kidney: {
     id: 'kidney',
@@ -234,6 +309,31 @@ export const structures: Record<string, AnatomicalStructure> = {
       'Narząd parzysty filtrujący krew i produkujący mocz. Reguluje gospodarkę wodno-elektrolitową, ciśnienie krwi i równowagę kwasowo-zasadową.',
     biologicalNotes:
       'Masa: ~150 g. Filtruje ~180 l osocza/dobę, produkuje ~1,5 l moczu. Jednostka funkcjonalna: nefron (~1 mln/nerkę). Hormon: erytropoetyna (EPO).',
-    annotations: [],
+    annotations: [
+      {
+        id: 'ann-kidney-1',
+        label: 'Kora nerki',
+        nameLAT: 'Cortex renalis',
+        description: 'Zewnętrzna warstwa nerki zawierająca ciałka nerkowe, gdzie zaczyna się filtracja osocza.',
+        position: [-0.55, 0.55, 0.2],
+        structureId: 'kidney',
+      },
+      {
+        id: 'ann-kidney-2',
+        label: 'Rdzeń nerki',
+        nameLAT: 'Medulla renalis',
+        description: 'Wewnętrzna część z piramidami nerkowymi, które zagęszczają mocz i kierują go do kielichów.',
+        position: [0.05, 0, 0.35],
+        structureId: 'kidney',
+      },
+      {
+        id: 'ann-kidney-3',
+        label: 'Miedniczka nerkowa',
+        nameLAT: 'Pelvis renalis',
+        description: 'Zbiera mocz z kielichów nerkowych i przechodzi w moczowód.',
+        position: [0.55, -0.25, 0.5],
+        structureId: 'kidney',
+      },
+    ],
   },
 }
