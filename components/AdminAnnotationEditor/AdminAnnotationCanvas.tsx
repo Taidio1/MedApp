@@ -1,12 +1,16 @@
 'use client'
 
-import { Canvas, ThreeEvent } from '@react-three/fiber'
+import { Canvas, ThreeEvent, useThree } from '@react-three/fiber'
 import { OrbitControls, useGLTF } from '@react-three/drei'
-import { Component, ReactNode, Suspense, useMemo, useRef } from 'react'
+import { Component, ReactNode, Suspense, forwardRef, useImperativeHandle, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { Annotation } from '@/lib/types'
 
 export type EditorMode = 'select' | 'add' | 'move' | 'preview'
+
+export interface AdminAnnotationCanvasHandle {
+  captureViews(): Promise<string[]>
+}
 
 interface AdminAnnotationCanvasProps {
   annotations: Annotation[]
@@ -226,18 +230,56 @@ function EditablePoint({
   )
 }
 
-export function AdminAnnotationCanvas({
-  annotations,
-  mode,
-  modelUrl,
-  selectedAnnotationId,
-  onAddAnnotation,
-  onMoveAnnotation,
-  onSelectAnnotation,
-  onMessage,
-  snapEnabled,
-  snapStep,
-}: AdminAnnotationCanvasProps) {
+function CaptureController({
+  captureRef,
+}: {
+  captureRef: React.ForwardedRef<AdminAnnotationCanvasHandle>
+}) {
+  const { gl, scene } = useThree()
+
+  useImperativeHandle(captureRef, () => ({
+    captureViews: async (): Promise<string[]> => {
+      const captureCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100)
+      const views: [number, number, number][] = [
+        [0, 0, 5],
+        [5, 0, 0],
+        [0, 0, -5],
+        [0, 5, 0],
+      ]
+      const images: string[] = []
+      for (const [x, y, z] of views) {
+        captureCamera.position.set(x, y, z)
+        captureCamera.lookAt(0, 0, 0)
+        captureCamera.aspect = gl.domElement.width / gl.domElement.height
+        captureCamera.updateProjectionMatrix()
+        gl.render(scene, captureCamera)
+        images.push(gl.domElement.toDataURL('image/jpeg', 0.7))
+      }
+      return images
+    },
+  }))
+
+  return null
+}
+
+export const AdminAnnotationCanvas = forwardRef<
+  AdminAnnotationCanvasHandle,
+  AdminAnnotationCanvasProps
+>(function AdminAnnotationCanvas(
+  {
+    annotations,
+    mode,
+    modelUrl,
+    selectedAnnotationId,
+    onAddAnnotation,
+    onMoveAnnotation,
+    onSelectAnnotation,
+    onMessage,
+    snapEnabled,
+    snapStep,
+  },
+  ref,
+) {
   return (
     <div className="relative h-full overflow-hidden bg-[#101827]">
       <div className="absolute left-4 top-4 z-10 rounded-md border border-[#334155] bg-[#0f172a]/90 px-3 py-2 text-[11px] text-slate-300 shadow-lg">
@@ -254,6 +296,7 @@ export function AdminAnnotationCanvas({
           if (mode === 'add') onMessage('Kliknij bezpośrednio w model, aby dodać punkt.')
         }}
       >
+        <CaptureController captureRef={ref} />
         <ambientLight intensity={0.45} />
         <directionalLight position={[5, 10, 5]} intensity={1.1} />
         <directionalLight position={[-4, -4, -4]} intensity={0.25} />
@@ -302,4 +345,4 @@ export function AdminAnnotationCanvas({
       </Canvas>
     </div>
   )
-}
+})
