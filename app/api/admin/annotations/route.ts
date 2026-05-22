@@ -1,15 +1,19 @@
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
-import path from 'node:path'
-import { baseStructures } from '@/lib/anatomyData'
-import {
-  AnnotationStore,
-  AnnotationStoreRecord,
-  normalizeAnnotationStore,
-} from '@/lib/annotationStore'
+import { createSupabaseServerClient } from '@/lib/auth/server'
 import { getCurrentUserProfile } from '@/lib/auth/guards'
 
-const dataDirectory = path.join(process.cwd(), 'data')
-const annotationsPath = path.join(dataDirectory, 'annotations.json')
+const MIN_POINT_SIZE = 0.02
+const MAX_POINT_SIZE = 0.25
+const DEFAULT_POINT_SIZE = 0.08
+
+interface AnnotationRecord {
+  id: string
+  label: string
+  nameLAT?: string
+  description?: string
+  position: [number, number, number]
+  size?: number
+  visible?: boolean
+}
 
 async function rejectNonAdmin(): Promise<Response | null> {
   const profile = await getCurrentUserProfile()
@@ -22,52 +26,54 @@ async function rejectNonAdmin(): Promise<Response | null> {
   return null
 }
 
-async function readAnnotationStore(): Promise<AnnotationStore> {
-  try {
-    const raw = await readFile(annotationsPath, 'utf8')
-    return normalizeAnnotationStore(JSON.parse(raw), Object.keys(baseStructures))
-  } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
-      return {}
-    }
-
-    throw error
-  }
-}
-
-async function writeAnnotationStore(store: AnnotationStore) {
-  await mkdir(dataDirectory, { recursive: true })
-
-  const tmpPath = `${annotationsPath}.${Date.now()}.tmp`
-  const content = `${JSON.stringify(store, null, 2)}\n`
-
-  await writeFile(tmpPath, content, 'utf8')
-  await rename(tmpPath, annotationsPath)
-}
-
-function compactStructures() {
-  return Object.values(baseStructures).map((structure) => ({
-    id: structure.id,
-    namePL: structure.namePL,
-    nameLAT: structure.nameLAT,
-    system: structure.system,
-    hasLayers: Boolean(structure.layers?.length),
-  }))
-}
-
 export async function GET() {
   const rejected = await rejectNonAdmin()
   if (rejected) return rejected
 
   try {
-    return Response.json({
-      structures: compactStructures(),
-      annotations: await readAnnotationStore(),
-    })
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Nie udało się odczytać anotacji'
+    const supabase = await createSupabaseServerClient()
 
+    const [structuresResult, annotationsResult] = await Promise.all([
+      supabase
+        .from('anatomy_structures')
+        .select('id, name_pl, name_lat, anatomical_system, anatomy_layers(layer_key)')
+        .eq('is_published', true)
+        .order('sort_order'),
+      supabase
+        .from('annotations')
+        .select('structure_id, annotation_key, label, name_lat, description, position, size, visible')
+        .order('structure_id'),
+    ])
+
+    if (structuresResult.error) throw new Error(structuresResult.error.message)
+    if (annotationsResult.error) throw new Error(annotationsResult.error.message)
+
+    const structures = (structuresResult.data ?? []).map((s: Record<string, unknown>) => ({
+      id: s.id as string,
+      namePL: s.name_pl as string,
+      nameLAT: s.name_lat as string,
+      system: s.anatomical_system as string,
+      hasLayers: Array.isArray(s.anatomy_layers) && (s.anatomy_layers as unknown[]).length > 0,
+    }))
+
+    const annotations: Record<string, AnnotationRecord[]> = {}
+    for (const row of (annotationsResult.data ?? []) as Record<string, unknown>[]) {
+      const sid = row.structure_id as string
+      if (!annotations[sid]) annotations[sid] = []
+      annotations[sid].push({
+        id: row.annotation_key as string,
+        label: row.label as string,
+        ...(row.name_lat != null ? { nameLAT: row.name_lat as string } : {}),
+        ...(row.description != null ? { description: row.description as string } : {}),
+        position: row.position as [number, number, number],
+        size: row.size as number,
+        visible: row.visible as boolean,
+      })
+    }
+
+    return Response.json({ structures, annotations })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Nie udało się pobrać danych'
     return Response.json({ error: message }, { status: 500 })
   }
 }
@@ -76,10 +82,7 @@ export async function PUT(request: Request) {
   const rejected = await rejectNonAdmin()
   if (rejected) return rejected
 
-  let body: {
-    structureId?: unknown
-    annotations?: unknown
-  }
+  let body: { structureId?: unknown; annotations?: unknown }
 
   try {
     body = await request.json()
@@ -95,24 +98,40 @@ export async function PUT(request: Request) {
     return Response.json({ error: 'Pole annotations musi być tablicą' }, { status: 400 })
   }
 
+  const structureId = body.structureId
+  const incoming = body.annotations as AnnotationRecord[]
+
   try {
-    const currentStore = await readAnnotationStore()
-    const nextRawStore = {
-      ...currentStore,
-      [body.structureId]: body.annotations as AnnotationStoreRecord[],
+    const supabase = await createSupabaseServerClient()
+
+    const { error: deleteError } = await supabase
+      .from('annotations')
+      .delete()
+      .eq('structure_id', structureId)
+
+    if (deleteError) throw new Error(deleteError.message)
+
+    if (incoming.length > 0) {
+      const rows = incoming.map((a) => ({
+        structure_id: structureId,
+        annotation_key: a.id,
+        label: a.label,
+        name_lat: a.nameLAT ?? null,
+        description: a.description ?? null,
+        position: a.position,
+        size: a.size != null
+          ? Math.min(MAX_POINT_SIZE, Math.max(MIN_POINT_SIZE, a.size))
+          : DEFAULT_POINT_SIZE,
+        visible: a.visible !== false,
+      }))
+
+      const { error: insertError } = await supabase.from('annotations').insert(rows)
+      if (insertError) throw new Error(insertError.message)
     }
-    const nextStore = normalizeAnnotationStore(nextRawStore, Object.keys(baseStructures))
 
-    await writeAnnotationStore(nextStore)
-
-    return Response.json({
-      structureId: body.structureId,
-      annotations: nextStore[body.structureId] ?? [],
-    })
+    return Response.json({ structureId, annotations: incoming })
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Nie udało się zapisać anotacji'
-
+    const message = error instanceof Error ? error.message : 'Nie udało się zapisać anotacji'
     return Response.json({ error: message }, { status: 400 })
   }
 }
