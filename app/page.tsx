@@ -1,9 +1,13 @@
+import { requireUser } from '@/lib/auth/guards'
 import { PanelLeft } from '@/components/PanelLeft/PanelLeft'
 import { Viewer3D } from '@/components/Viewer3D/Viewer3D'
 import { PanelRight } from '@/components/PanelRight/PanelRight'
 import { PanelBottom } from '@/components/PanelBottom/PanelBottom'
+import { UserMenu } from '@/components/UserMenu/UserMenu'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const profile = await requireUser()
+
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* ===== HEADER ===== */}
@@ -33,11 +37,13 @@ export default function HomePage() {
           ))}
         </nav>
 
-        {/* Prawa część headera */}
+        {/* Prawa część headera — user menu */}
         <div className="ml-auto flex items-center gap-2">
-          <div className="text-xs text-gray-500">
-            v0.1 — MVP
-          </div>
+          <UserMenu
+            email={profile.email}
+            displayName={profile.displayName}
+            isAdmin={profile.role === 'admin'}
+          />
         </div>
       </header>
 

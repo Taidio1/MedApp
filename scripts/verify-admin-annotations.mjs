@@ -65,8 +65,12 @@ assert(
 
 const route = read('app/api/admin/annotations/route.ts')
 assert(
-  route.includes("process.env.NODE_ENV !== 'development'"),
-  'admin route must reject non-development environments',
+  !route.includes("process.env.NODE_ENV !== 'development'"),
+  'admin route must NOT use NODE_ENV guard (replaced by role-based auth)',
+)
+assert(
+  route.includes('401') && route.includes('403'),
+  'admin route must return 401 for missing session and 403 for non-admin',
 )
 assert(route.includes('export async function GET'), 'admin route must export GET')
 assert(route.includes('export async function PUT'), 'admin route must export PUT')
@@ -84,10 +88,17 @@ assert(
 )
 
 const adminPage = read('app/admin/annotations/page.tsx')
-assert(adminPage.includes('notFound'), 'admin page must hide outside development')
+assert(
+  adminPage.includes('requireAdmin'),
+  'admin page must call requireAdmin() (role-based guard)',
+)
+assert(
+  !adminPage.includes("NODE_ENV !== 'development'"),
+  'admin page must NOT use NODE_ENV guard',
+)
 assert(
   adminPage.includes('AdminAnnotationEditor'),
-  'admin page must render AdminAnnotationEditor in development',
+  'admin page must render AdminAnnotationEditor',
 )
 
 console.log('Admin annotation verification passed')

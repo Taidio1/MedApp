@@ -6,15 +6,19 @@ import {
   AnnotationStoreRecord,
   normalizeAnnotationStore,
 } from '@/lib/annotationStore'
+import { getCurrentUserProfile } from '@/lib/auth/guards'
 
 const dataDirectory = path.join(process.cwd(), 'data')
 const annotationsPath = path.join(dataDirectory, 'annotations.json')
 
-function rejectOutsideDevelopment() {
-  if (process.env.NODE_ENV !== 'development') {
-    return Response.json({ error: 'Admin API disabled' }, { status: 403 })
+async function rejectNonAdmin(): Promise<Response | null> {
+  const profile = await getCurrentUserProfile()
+  if (!profile) {
+    return Response.json({ error: 'Brak autoryzacji' }, { status: 401 })
   }
-
+  if (profile.role !== 'admin') {
+    return Response.json({ error: 'Brak uprawnień' }, { status: 403 })
+  }
   return null
 }
 
@@ -52,7 +56,7 @@ function compactStructures() {
 }
 
 export async function GET() {
-  const rejected = rejectOutsideDevelopment()
+  const rejected = await rejectNonAdmin()
   if (rejected) return rejected
 
   try {
@@ -69,7 +73,7 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const rejected = rejectOutsideDevelopment()
+  const rejected = await rejectNonAdmin()
   if (rejected) return rejected
 
   let body: {

@@ -8,11 +8,14 @@
     "verify:learning-data": "node scripts/verify-learning-data.mjs",
     "verify:annotation-panel": "node scripts/verify-stable-annotation-panel.mjs",
     "verify:admin-annotations": "node scripts/verify-admin-annotations.mjs",
+    "verify:auth-admin": "node scripts/verify-auth-admin.mjs",
     "start": "next start"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.106.1",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
