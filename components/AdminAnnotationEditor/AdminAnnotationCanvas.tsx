@@ -17,6 +17,12 @@ interface AdminAnnotationCanvasProps {
   onMoveAnnotation: (id: string, position: [number, number, number]) => void
   onSelectAnnotation: (id: string) => void
   onMessage: (message: string) => void
+  snapEnabled: boolean
+  snapStep: number
+}
+
+function snapToGrid(value: number, step: number): number {
+  return Math.round(value / step) * step
 }
 
 class ModelLoadBoundary extends Component<
@@ -79,11 +85,15 @@ function EditableModel({
   mode,
   onAddAnnotation,
   onMessage,
+  snapEnabled,
+  snapStep,
 }: {
   url: string
   mode: EditorMode
   onAddAnnotation: (position: [number, number, number]) => void
   onMessage: (message: string) => void
+  snapEnabled: boolean
+  snapStep: number
 }) {
   const { scene } = useGLTF(url)
   const normalizedScene = useMemo(() => normalizeScene(scene), [scene])
@@ -92,12 +102,9 @@ function EditableModel({
     if (mode !== 'add') return
 
     event.stopPropagation()
-    const point = event.point
-    onAddAnnotation([
-      Number(point.x.toFixed(3)),
-      Number(point.y.toFixed(3)),
-      Number(point.z.toFixed(3)),
-    ])
+    const p = event.point
+    const snap = (v: number) => snapEnabled ? snapToGrid(v, snapStep) : Number(v.toFixed(3))
+    onAddAnnotation([snap(p.x), snap(p.y), snap(p.z)])
   }
 
   return <primitive object={normalizedScene} onClick={handleClick} />
@@ -141,12 +148,16 @@ function EditablePoint({
   selected,
   onSelectAnnotation,
   onMoveAnnotation,
+  snapEnabled,
+  snapStep,
 }: {
   annotation: Annotation
   mode: EditorMode
   selected: boolean
   onSelectAnnotation: (id: string) => void
   onMoveAnnotation: (id: string, position: [number, number, number]) => void
+  snapEnabled: boolean
+  snapStep: number
 }) {
   const dragging = useRef(false)
   const baseSize = annotation.size ?? 0.08
@@ -168,12 +179,8 @@ function EditablePoint({
       (intersection) => intersection.object.userData.isEditableModelMesh,
     )
     const point = hit?.point ?? event.point
-
-    onMoveAnnotation(annotation.id, [
-      Number(point.x.toFixed(3)),
-      Number(point.y.toFixed(3)),
-      Number(point.z.toFixed(3)),
-    ])
+    const snap = (v: number) => snapEnabled ? snapToGrid(v, snapStep) : Number(v.toFixed(3))
+    onMoveAnnotation(annotation.id, [snap(point.x), snap(point.y), snap(point.z)])
   }
 
   const stopDragging = (event: ThreeEvent<PointerEvent>) => {
@@ -228,6 +235,8 @@ export function AdminAnnotationCanvas({
   onMoveAnnotation,
   onSelectAnnotation,
   onMessage,
+  snapEnabled,
+  snapStep,
 }: AdminAnnotationCanvasProps) {
   return (
     <div className="relative h-full overflow-hidden bg-[#101827]">
@@ -260,6 +269,8 @@ export function AdminAnnotationCanvas({
                 mode={mode}
                 onAddAnnotation={onAddAnnotation}
                 onMessage={onMessage}
+                snapEnabled={snapEnabled}
+                snapStep={snapStep}
               />
             ) : (
               <ModelFallback mode={mode} onAddAnnotation={onAddAnnotation} />
@@ -275,6 +286,8 @@ export function AdminAnnotationCanvas({
             selected={annotation.id === selectedAnnotationId}
             onSelectAnnotation={onSelectAnnotation}
             onMoveAnnotation={onMoveAnnotation}
+            snapEnabled={snapEnabled}
+            snapStep={snapStep}
           />
         ))}
 

@@ -85,6 +85,8 @@ export function AdminAnnotationEditor() {
   const [saveState, setSaveState] = useState<SaveState>('idle')
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [snapEnabled, setSnapEnabled] = useState(false)
+  const [snapStep, setSnapStep] = useState(0.05)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -392,9 +394,29 @@ export function AdminAnnotationEditor() {
                 {item.label}
               </button>
             ))}
-            {message && (
-              <span className="ml-auto text-[11px] text-amber-200">{message}</span>
-            )}
+            <div className="ml-auto flex items-center gap-2">
+              <label className="flex items-center gap-1.5 text-xs text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={snapEnabled}
+                  onChange={(e) => setSnapEnabled(e.target.checked)}
+                  className="h-3.5 w-3.5 accent-[#fbbf24]"
+                />
+                Snap
+              </label>
+              {snapEnabled && (
+                <input
+                  type="number"
+                  min={0.01}
+                  max={0.5}
+                  step={0.01}
+                  value={snapStep}
+                  onChange={(e) => setSnapStep(Number(e.target.value))}
+                  className="w-16 rounded border border-[#334155] bg-[#0f172a] px-2 py-1 text-xs text-slate-100 outline-none focus:border-[#fbbf24]"
+                />
+              )}
+              {message && <span className="text-[11px] text-amber-200">{message}</span>}
+            </div>
           </div>
 
           <AdminAnnotationCanvas
@@ -409,6 +431,8 @@ export function AdminAnnotationEditor() {
               setMessage(nextMessage)
               window.setTimeout(() => setMessage(null), 2200)
             }}
+            snapEnabled={snapEnabled}
+            snapStep={snapStep}
           />
         </section>
 
