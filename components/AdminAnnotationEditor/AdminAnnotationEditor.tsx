@@ -2,7 +2,19 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Annotation } from '@/lib/types'
-import { annotationSizeBounds, AnnotationStoreRecord } from '@/lib/annotationStore'
+const ANNOTATION_SIZE_MIN = 0.02
+const ANNOTATION_SIZE_MAX = 0.25
+const ANNOTATION_SIZE_DEFAULT = 0.08
+
+interface AnnotationStoreRecord {
+  id: string
+  label: string
+  nameLAT?: string
+  description?: string
+  position: [number, number, number]
+  size?: number
+  visible?: boolean
+}
 import {
   AdminAnnotationCanvas,
   EditorMode,
@@ -209,7 +221,7 @@ export function AdminAnnotationEditor() {
       nameLAT: '',
       description: '',
       position,
-      size: annotationSizeBounds.default,
+      size: ANNOTATION_SIZE_DEFAULT,
       visible: true,
       structureId: selectedStructureId,
     }
@@ -485,13 +497,13 @@ export function AdminAnnotationEditor() {
                 ))}
               </div>
 
-              <Field label={`Rozmiar (${selectedAnnotation.size ?? annotationSizeBounds.default})`}>
+              <Field label={`Rozmiar (${selectedAnnotation.size ?? ANNOTATION_SIZE_DEFAULT})`}>
                 <input
                   type="range"
-                  min={annotationSizeBounds.min}
-                  max={annotationSizeBounds.max}
+                  min={ANNOTATION_SIZE_MIN}
+                  max={ANNOTATION_SIZE_MAX}
                   step="0.01"
-                  value={selectedAnnotation.size ?? annotationSizeBounds.default}
+                  value={selectedAnnotation.size ?? ANNOTATION_SIZE_DEFAULT}
                   onChange={(event) =>
                     patchAnnotation(selectedAnnotation.id, {
                       size: Number(event.target.value),
