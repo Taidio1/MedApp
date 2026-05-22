@@ -1,7 +1,11 @@
 import { AnatomyNode, AnatomicalStructure } from './types'
+import {
+  getAnnotationStoreForClient,
+  mergeStructuresWithAnnotationStore,
+} from './annotationStore'
 
 /** Drzewo nawigacji w lewym panelu */
-export const anatomyTree: AnatomyNode[] = [
+export const baseAnatomyTree: AnatomyNode[] = [
   {
     id: 'oun',
     label: 'Ośrodkowy Układ Nerwowy',
@@ -57,7 +61,7 @@ export const anatomyTree: AnatomyNode[] = [
 ]
 
 /** Słownik wszystkich struktur anatomicznych */
-export const structures: Record<string, AnatomicalStructure> = {
+export const baseStructures: Record<string, AnatomicalStructure> = {
   'kora-mozgowa': {
     id: 'kora-mozgowa',
     namePL: 'Kora mózgowa',
@@ -337,3 +341,10 @@ export const structures: Record<string, AnatomicalStructure> = {
     ],
   },
 }
+
+export const anatomyTree = baseAnatomyTree
+
+export const structures = mergeStructuresWithAnnotationStore(
+  baseStructures,
+  getAnnotationStoreForClient(Object.keys(baseStructures)),
+)

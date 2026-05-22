@@ -8,6 +8,7 @@ import { Annotation } from '@/lib/types'
 function AnnotationPoint({ annotation }: { annotation: Annotation }) {
   const { activeAnnotation, setActiveAnnotation, setSelectedStructure } = useAppStore()
   const isActive = activeAnnotation?.id === annotation.id
+  const baseSize = annotation.size ?? 0.08
 
   const handleClick = () => {
     const structure = structures[annotation.structureId]
@@ -23,7 +24,7 @@ function AnnotationPoint({ annotation }: { annotation: Annotation }) {
         onClick={handleClick}
         onPointerOver={() => setActiveAnnotation(annotation)}
       >
-        <sphereGeometry args={[isActive ? 0.11 : 0.08, 12, 12]} />
+        <sphereGeometry args={[isActive ? baseSize * 1.35 : baseSize, 12, 12]} />
         <meshBasicMaterial
           color={isActive ? '#f59e0b' : '#fbbf24'}
           depthTest={false}
@@ -32,7 +33,7 @@ function AnnotationPoint({ annotation }: { annotation: Annotation }) {
 
       {/* Pulsująca obwódka */}
       <mesh renderOrder={19}>
-        <sphereGeometry args={[0.12, 12, 12]} />
+        <sphereGeometry args={[baseSize * 1.5, 12, 12]} />
         <meshBasicMaterial
           color="#fbbf24"
           transparent
@@ -54,9 +55,11 @@ export function Annotations() {
 
   return (
     <>
-      {selectedStructure.annotations.map((annotation) => (
-        <AnnotationPoint key={annotation.id} annotation={annotation} />
-      ))}
+      {selectedStructure.annotations
+        .filter((annotation) => annotation.visible !== false)
+        .map((annotation) => (
+          <AnnotationPoint key={annotation.id} annotation={annotation} />
+        ))}
     </>
   )
 }
