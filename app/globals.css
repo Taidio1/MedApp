@@ -40,3 +40,14 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #7c3aed;
 }
+
+.viewer3d-scene canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+@media (max-width: 767px) {
+  .viewer-mobile-sidebar {
+    display: none !important;
+  }
+}

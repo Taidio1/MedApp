@@ -148,6 +148,7 @@ export function PanelRight() {
 
   return (
     <aside
+      className="viewer-mobile-sidebar"
       style={{
         width: '320px',
         flexShrink: 0,

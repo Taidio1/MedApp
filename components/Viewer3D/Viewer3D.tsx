@@ -283,18 +283,31 @@ function WASDControls() {
 
 // ─── Camera Reset ─────────────────────────────────────────────────────────────
 
+function getCameraPosition(aspect: number): [number, number, number] {
+  return aspect < 0.8 ? [0, 1.2, 7.2] : [0, 1.2, 5]
+}
+
 function CameraResetWatcher() {
   const { camera } = useThree()
+  const { width, height } = useThree((state) => state.size)
   const trigger = useAppStore((s) => s.cameraResetTrigger)
   const previousTrigger = useRef(0)
+  const previousAspectMode = useRef<string | null>(null)
 
   useEffect(() => {
-    if (trigger > 0 && trigger !== previousTrigger.current) {
+    const aspect = height > 0 ? width / height : 1
+    const aspectMode = aspect < 0.8 ? 'narrow' : 'wide'
+
+    if (
+      previousAspectMode.current !== aspectMode ||
+      (trigger > 0 && trigger !== previousTrigger.current)
+    ) {
       previousTrigger.current = trigger
-      camera.position.set(0, 0, 5)
+      previousAspectMode.current = aspectMode
+      camera.position.set(...getCameraPosition(aspect))
       camera.lookAt(0, 0, 0)
     }
-  }, [trigger, camera])
+  }, [trigger, camera, width, height])
 
   return null
 }
@@ -311,7 +324,10 @@ export function Viewer3D() {
   const hasLayers = !!(selectedStructure?.layers?.length)
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', background: '#1a1a2e' }}>
+    <div
+      className="viewer3d-scene"
+      style={{ position: 'relative', width: '100%', height: '100%', background: '#f4f1ea' }}
+    >
       <ViewerToolbar />
 
       {hasLayers && selectedStructure?.layers && (
@@ -333,13 +349,13 @@ export function Viewer3D() {
             zIndex: 1,
           }}
         >
-          <p style={{ color: '#3a3a6a', fontSize: '11px' }}>
+          <p style={{ color: '#6b5f78', fontSize: '11px' }}>
             Wgraj model{' '}
-            <code style={{ background: '#2a2a4e', padding: '0 4px', borderRadius: '3px' }}>
+            <code style={{ background: '#e7e0d6', padding: '0 4px', borderRadius: '3px' }}>
               .glb
             </code>{' '}
             do{' '}
-            <code style={{ background: '#2a2a4e', padding: '0 4px', borderRadius: '3px' }}>
+            <code style={{ background: '#e7e0d6', padding: '0 4px', borderRadius: '3px' }}>
               /public/models/
             </code>
           </p>
@@ -353,19 +369,32 @@ export function Viewer3D() {
           left: 0,
           right: 0,
           height: '64px',
-          background: 'linear-gradient(to top, #1a1a2e, transparent)',
+          background: 'linear-gradient(to top, rgba(244,241,234,0.95), transparent)',
           pointerEvents: 'none',
           zIndex: 1,
         }}
       />
 
       <Canvas
-        camera={{ position: [0, 0, 5], fov: 50 }}
+        camera={{ position: [0, 1.2, 5], fov: 50 }}
         gl={{ antialias: true, alpha: false, localClippingEnabled: true }}
+        style={{ width: '100%', height: '100%' }}
       >
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[5, 10, 5]} intensity={1} />
-        <directionalLight position={[-5, -5, -5]} intensity={0.2} />
+        <color attach="background" args={['#f4f1ea']} />
+        <fog attach="fog" args={['#f4f1ea', 8, 16]} />
+
+        <ambientLight intensity={0.65} />
+        <directionalLight position={[5, 10, 5]} intensity={1.1} />
+        <directionalLight position={[-5, -5, -5]} intensity={0.35} />
+
+        <mesh position={[0, -1.35, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[16, 16]} />
+          <meshStandardMaterial color="#eee8dc" roughness={1} />
+        </mesh>
+        <gridHelper
+          args={[16, 8, '#6b7280', '#b8b2a8']}
+          position={[0, -1.34, 0]}
+        />
 
         <Suspense fallback={null}>
           {modelUrl && hasLayers && selectedStructure?.layers ? (
