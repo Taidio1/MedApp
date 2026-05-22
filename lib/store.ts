@@ -2,47 +2,41 @@ import { create } from 'zustand'
 import { AnatomicalStructure, Annotation, ChatMessage } from './types'
 
 interface AppState {
-  // Aktualnie wybrana struktura anatomiczna
   selectedStructure: AnatomicalStructure | null
   setSelectedStructure: (structure: AnatomicalStructure | null) => void
 
-  // Historia wiadomości w chacie AI (per sesja)
   chatMessages: ChatMessage[]
   addChatMessage: (message: ChatMessage) => void
   clearChatMessages: () => void
 
-  // Stan ładowania odpowiedzi AI
   isAILoading: boolean
   setIsAILoading: (loading: boolean) => void
 
-  // Trigger do resetowania widoku kamery (inkrementowany przez toolbar)
   cameraResetTrigger: number
   triggerCameraReset: () => void
 
-  // Auto-rotacja modelu 3D
   autoRotate: boolean
   setAutoRotate: (rotate: boolean) => void
 
-  // Anotacja aktywowana przez hover na punkcie 3D
   activeAnnotation: Annotation | null
   setActiveAnnotation: (annotation: Annotation | null) => void
 
-  // Widoczność warstw: meshId → czy widoczny
   layerVisibility: Record<string, boolean>
   setLayerVisibility: (meshId: string, visible: boolean) => void
   resetLayerVisibility: () => void
 
-  // Stopień eksplozji 0.0–1.0
   explodeAmount: number
   setExplodeAmount: (amount: number) => void
 
-  // Pozycja płaszczyzny tnącej Y (null = wyłączona)
   clippingPlaneY: number | null
   setClippingPlaneY: (y: number | null) => void
 
-  // Czy połówki czaszki są rozsunięte
   splitOpen: boolean
   setSplitOpen: (open: boolean) => void
+
+  structures: Record<string, AnatomicalStructure>
+  structuresLoading: boolean
+  loadStructures: () => Promise<void>
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -91,4 +85,18 @@ export const useAppStore = create<AppState>((set) => ({
 
   splitOpen: false,
   setSplitOpen: (open) => set({ splitOpen: open }),
+
+  structures: {},
+  structuresLoading: false,
+  loadStructures: async () => {
+    set({ structuresLoading: true })
+    try {
+      const response = await fetch('/api/structures')
+      if (!response.ok) throw new Error('Nie udało się pobrać struktur')
+      const data: Record<string, AnatomicalStructure> = await response.json()
+      set({ structures: data, structuresLoading: false })
+    } catch {
+      set({ structuresLoading: false })
+    }
+  },
 }))
