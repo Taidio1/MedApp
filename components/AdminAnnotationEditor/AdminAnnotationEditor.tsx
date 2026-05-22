@@ -520,6 +520,15 @@ export function AdminAnnotationEditor() {
                   </Field>
                 ))}
               </div>
+              <p className="text-[11px] text-[#8a8174]">
+                r ={' '}
+                {Math.sqrt(
+                  selectedAnnotation.position[0] ** 2 +
+                  selectedAnnotation.position[1] ** 2 +
+                  selectedAnnotation.position[2] ** 2,
+                ).toFixed(3)}
+                {' '}(odległość od centrum)
+              </p>
 
               <Field label={`Rozmiar (${selectedAnnotation.size ?? ANNOTATION_SIZE_DEFAULT})`}>
                 <input
