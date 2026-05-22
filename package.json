@@ -9,6 +9,7 @@
     "verify:annotation-panel": "node scripts/verify-stable-annotation-panel.mjs",
     "verify:admin-annotations": "node scripts/verify-admin-annotations.mjs",
     "verify:auth-admin": "node scripts/verify-auth-admin.mjs",
+    "verify:ai-suggest": "node scripts/verify-ai-suggest.mjs",
     "start": "next start"
   },
   "dependencies": {
