@@ -17,6 +17,7 @@ interface AnnotationStoreRecord {
 }
 import {
   AdminAnnotationCanvas,
+  AdminAnnotationCanvasHandle,
   EditorMode,
 } from './AdminAnnotationCanvas'
 
@@ -87,6 +88,9 @@ export function AdminAnnotationEditor() {
   const [error, setError] = useState<string | null>(null)
   const [snapEnabled, setSnapEnabled] = useState(false)
   const [snapStep, setSnapStep] = useState(0.05)
+  type SuggestState = 'idle' | 'loading' | 'done' | 'error'
+  const [suggestState, setSuggestState] = useState<SuggestState>('idle')
+  const canvasRef = useRef<AdminAnnotationCanvasHandle>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -277,6 +281,33 @@ export function AdminAnnotationEditor() {
     persistAnnotations(selectedStructureId, annotations)
   }
 
+  const suggestPosition = async () => {
+    if (!selectedAnnotation || !canvasRef.current || !selectedStructure) return
+    setSuggestState('loading')
+    setError(null)
+    try {
+      const images = await canvasRef.current.captureViews()
+      const response = await fetch('/api/admin/suggest-annotation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          structureId: selectedStructureId,
+          structureNamePL: selectedStructure.namePL,
+          annotationLabel: selectedAnnotation.label,
+          images,
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error ?? 'Błąd AI')
+      patchAnnotation(selectedAnnotation.id, { position: data.position }, 0)
+      setSuggestState('done')
+      window.setTimeout(() => setSuggestState('idle'), 2200)
+    } catch (suggestError) {
+      setSuggestState('error')
+      setError(suggestError instanceof Error ? suggestError.message : 'Nieznany błąd AI')
+    }
+  }
+
   const modelUrl = selectedStructureId ? `/models/${selectedStructureId}.glb` : null
 
   if (loading) {
@@ -420,6 +451,7 @@ export function AdminAnnotationEditor() {
           </div>
 
           <AdminAnnotationCanvas
+            ref={canvasRef}
             annotations={annotations}
             mode={mode}
             modelUrl={modelUrl}
@@ -559,6 +591,20 @@ export function AdminAnnotationEditor() {
                   className="h-4 w-4 accent-[#7c3aed]"
                 />
               </label>
+
+              {selectedAnnotation.label.trim() !== '' && (
+                <button
+                  onClick={suggestPosition}
+                  disabled={suggestState === 'loading'}
+                  className="w-full rounded border border-[#7c3aed]/50 px-3 py-2 text-sm font-semibold text-[#7c3aed] transition-colors hover:bg-[#7c3aed]/10 disabled:opacity-40"
+                >
+                  {suggestState === 'loading'
+                    ? 'Pytam AI…'
+                    : suggestState === 'done'
+                      ? 'Pozycja zaktualizowana'
+                      : 'Zasugeruj pozycję'}
+                </button>
+              )}
 
               <div className="flex gap-2 pt-2">
                 <button
