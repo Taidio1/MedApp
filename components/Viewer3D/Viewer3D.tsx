@@ -1,7 +1,7 @@
 'use client'
 
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { ContactShadows, OrbitControls } from '@react-three/drei'
+import { ContactShadows, OrbitControls, useProgress } from '@react-three/drei'
 import { Suspense, useRef, useEffect, useState } from 'react'
 import * as THREE from 'three'
 import { ModelLoader } from './ModelLoader'
@@ -173,6 +173,17 @@ function SliderRow({
 
 // ─── WASD ─────────────────────────────────────────────────────────────────────
 
+function LoadingOverlay() {
+  const { active } = useProgress()
+  if (!active) return null
+  return (
+    <div className="model-loading-fallback">
+      <div className="model-loading-spinner" />
+      <span>Ładowanie modelu...</span>
+    </div>
+  )
+}
+
 function AnnotationDetailPanel() {
   const activeAnnotation = useAppStore((state) => state.activeAnnotation)
   const setActiveAnnotation = useAppStore((state) => state.setActiveAnnotation)
@@ -335,6 +346,7 @@ export function Viewer3D() {
       <AnnotationDetailPanel />
 
       <div className="canvas-wrap">
+        <LoadingOverlay />
         <div className="viewer3d-scene">
           <Canvas
             camera={{ position: [0, 1.2, 5.8], fov: 38 }}
