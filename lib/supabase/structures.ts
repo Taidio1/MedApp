@@ -28,10 +28,10 @@ interface AnnotationRow {
   position: number[]
   size: number
   visible: boolean
-  layer_ids: string[] | null
-  quiz_prompt: string | null
-  accepted_answers: string[] | null
-  difficulty: string | null
+  layer_ids?: string[] | null
+  quiz_prompt?: string | null
+  accepted_answers?: string[] | null
+  difficulty?: string | null
 }
 
 interface StructureRow {
@@ -69,7 +69,7 @@ const allowedPointLayers = new Set([
 
 const allowedDifficulties = new Set(['basic', 'intermediate', 'exam'])
 
-function mapLayerIds(value: string[] | null): AnnotationPointLayer[] {
+function mapLayerIds(value: string[] | null | undefined): AnnotationPointLayer[] {
   const layers = (value ?? []).filter((layer): layer is AnnotationPointLayer =>
     allowedPointLayers.has(layer),
   )
@@ -77,7 +77,7 @@ function mapLayerIds(value: string[] | null): AnnotationPointLayer[] {
   return layers.length > 0 ? layers : ['organ']
 }
 
-function mapDifficulty(value: string | null): AnnotationDifficulty | undefined {
+function mapDifficulty(value: string | null | undefined): AnnotationDifficulty | undefined {
   return value != null && allowedDifficulties.has(value)
     ? (value as AnnotationDifficulty)
     : undefined
@@ -105,15 +105,35 @@ function mapAnnotation(row: AnnotationRow, structureId: string): Annotation {
 export async function fetchStructures(
   supabase: SupabaseClient,
 ): Promise<Record<string, AnatomicalStructure>> {
-  const { data, error } = await supabase
-    .from('anatomy_structures')
-    .select(`
+  const selectWithLearningMetadata = `
       id, name_pl, name_lat, anatomical_system, description, biological_notes,
       anatomy_layers (layer_key, label, default_visible, is_pair, split_axis, split_distance, split_direction, explode_offset, base_position, sort_order),
       annotations (annotation_key, label, name_lat, description, position, size, visible, layer_ids, quiz_prompt, accepted_answers, difficulty)
-    `)
+    `
+  const selectLegacy = `
+      id, name_pl, name_lat, anatomical_system, description, biological_notes,
+      anatomy_layers (layer_key, label, default_visible, is_pair, split_axis, split_distance, split_direction, explode_offset, base_position, sort_order),
+      annotations (annotation_key, label, name_lat, description, position, size, visible)
+    `
+
+  const initialResult = await supabase
+    .from('anatomy_structures')
+    .select(selectWithLearningMetadata)
     .eq('is_published', true)
     .order('sort_order')
+  let data: unknown[] | null = initialResult.data
+  let error: { message: string } | null = initialResult.error
+
+  if (error && isMissingLearningMetadataColumn(error.message)) {
+    const legacyResult = await supabase
+      .from('anatomy_structures')
+      .select(selectLegacy)
+      .eq('is_published', true)
+      .order('sort_order')
+
+    data = legacyResult.data as unknown[] | null
+    error = legacyResult.error
+  }
 
   if (error) throw new Error(error.message)
 
@@ -137,4 +157,13 @@ export async function fetchStructures(
   }
 
   return result
+}
+
+function isMissingLearningMetadataColumn(message: string): boolean {
+  return [
+    'layer_ids',
+    'quiz_prompt',
+    'accepted_answers',
+    'difficulty',
+  ].some((column) => message.includes(column))
 }

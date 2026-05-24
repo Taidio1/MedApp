@@ -43,6 +43,15 @@ function sanitizeDifficulty(value: unknown): AnnotationDifficulty {
     : 'basic'
 }
 
+function isMissingLearningMetadataColumn(message: string): boolean {
+  return [
+    'layer_ids',
+    'quiz_prompt',
+    'accepted_answers',
+    'difficulty',
+  ].some((column) => message.includes(column))
+}
+
 interface AnnotationRecord {
   id: string
   label: string
@@ -75,7 +84,7 @@ export async function GET() {
   try {
     const supabase = await createSupabaseServerClient()
 
-    const [structuresResult, annotationsResult] = await Promise.all([
+    const [structuresResult, initialAnnotationsResult] = await Promise.all([
       supabase
         .from('anatomy_structures')
         .select('id, name_pl, name_lat, anatomical_system, anatomy_layers(layer_key)')
@@ -86,6 +95,20 @@ export async function GET() {
         .select('structure_id, annotation_key, label, name_lat, description, position, size, visible, layer_ids, quiz_prompt, accepted_answers, difficulty')
         .order('structure_id'),
     ])
+
+    let annotationsResult: {
+      data: unknown[] | null
+      error: { message: string } | null
+    } = initialAnnotationsResult
+    if (
+      annotationsResult.error &&
+      isMissingLearningMetadataColumn(annotationsResult.error.message)
+    ) {
+      annotationsResult = await supabase
+        .from('annotations')
+        .select('structure_id, annotation_key, label, name_lat, description, position, size, visible')
+        .order('structure_id')
+    }
 
     if (structuresResult.error) throw new Error(structuresResult.error.message)
     if (annotationsResult.error) throw new Error(annotationsResult.error.message)
@@ -179,7 +202,24 @@ export async function PUT(request: Request) {
         difficulty: sanitizeDifficulty(a.difficulty),
       }))
 
-      const { error: insertError } = await supabase.from('annotations').insert(rows)
+      let { error: insertError } = await supabase.from('annotations').insert(rows)
+
+      if (insertError && isMissingLearningMetadataColumn(insertError.message)) {
+        const legacyRows = rows.map((row) => ({
+          structure_id: row.structure_id,
+          annotation_key: row.annotation_key,
+          label: row.label,
+          name_lat: row.name_lat,
+          description: row.description,
+          position: row.position,
+          size: row.size,
+          visible: row.visible,
+        }))
+
+        const legacyResult = await supabase.from('annotations').insert(legacyRows)
+        insertError = legacyResult.error
+      }
+
       if (insertError) throw new Error(insertError.message)
     }
 
