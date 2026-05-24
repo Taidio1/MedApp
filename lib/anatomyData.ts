@@ -2,24 +2,6 @@ import { AnatomyNode } from './types'
 
 export const baseAnatomyTree: AnatomyNode[] = [
   {
-    id: 'oun',
-    label: 'Ośrodkowy Układ Nerwowy',
-    icon: '🧠',
-    children: [
-      {
-        id: 'mozgowie',
-        label: 'Mózgowie',
-        children: [
-          { id: 'kora', label: 'Kora mózgowa', structureId: 'kora-mozgowa' },
-          { id: 'mozdzek', label: 'Móżdżek', structureId: 'mozdzek' },
-          { id: 'pien', label: 'Pień mózgu', structureId: 'pien-mozgu' },
-          { id: 'glowa', label: 'Czaszka i mózg (3D)', structureId: 'glowa' },
-        ],
-      },
-      { id: 'rdzen', label: 'Rdzeń kręgowy', structureId: 'rdzen-kregowy' },
-    ],
-  },
-  {
     id: 'krazenie',
     label: 'Układ Krążenia',
     icon: '♥',
