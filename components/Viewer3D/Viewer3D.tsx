@@ -9,6 +9,7 @@ import { LayeredModel } from './LayeredModel'
 import { LayerPanel } from './LayerPanel'
 import { Annotations } from './Annotations'
 import { useAppStore } from '@/lib/store'
+import { RotateCcw, Columns, Maximize2, Scissors, RefreshCw } from 'lucide-react'
 
 // ─── Toolbar ─────────────────────────────────────────────────────────────────
 
@@ -61,29 +62,33 @@ function ViewerToolbar() {
     <>
       <div className="viewer-toolbar">
         <ToolbarBtn
+          icon={<RotateCcw size={15} />}
           label="Obrót"
           active={autoRotate}
           onClick={() => setAutoRotate(!autoRotate)}
         />
         <ToolbarBtn
+          icon={<Columns size={15} />}
           label="Split"
           active={splitOpen}
           disabled={!hasLayers}
           onClick={handleSplit}
         />
         <ToolbarBtn
+          icon={<Maximize2 size={15} />}
           label="Rozsuń"
           active={showExplodeSlider}
           disabled={!hasLayers}
           onClick={handleExplode}
         />
         <ToolbarBtn
+          icon={<Scissors size={15} />}
           label="Wycinek"
           active={showClipSlider}
           disabled={!hasLayers}
           onClick={handleCrossSection}
         />
-        <ToolbarBtn label="Reset" onClick={handleReset} />
+        <ToolbarBtn icon={<RefreshCw size={15} />} label="Reset" onClick={handleReset} />
       </div>
 
       {showExplodeSlider && (
@@ -112,11 +117,13 @@ function ViewerToolbar() {
 }
 
 function ToolbarBtn({
+  icon,
   label,
   active = false,
   disabled = false,
   onClick,
 }: {
+  icon: React.ReactNode
   label: string
   active?: boolean
   disabled?: boolean
@@ -128,6 +135,7 @@ function ToolbarBtn({
       disabled={disabled}
       className={active ? 'is-active' : undefined}
     >
+      {icon}
       {label}
     </button>
   )
@@ -316,27 +324,6 @@ export function Viewer3D() {
           <h2>{selectedStructure?.namePL ?? 'Atlas 3D'}</h2>
           <p>{selectedStructure?.nameLAT ?? 'Wybierz strukturę z panelu po lewej'}</p>
         </div>
-
-        <div className="view-card">
-          <span className="view-card-title">View Mode</span>
-          <div className="mode-switcher">
-            <button type="button" className="mode-button is-active" title="Mesh">
-              Mesh
-            </button>
-            <button
-              type="button"
-              className={clippingPlaneY !== null ? 'mode-button is-active' : 'mode-button'}
-              title="Wycinek"
-            >
-              Focus
-            </button>
-          </div>
-          <label className="toggle-line">
-            <span>Cross Section</span>
-            <input type="checkbox" checked={clippingPlaneY !== null} readOnly />
-            <i className="toggle-track" />
-          </label>
-        </div>
       </div>
 
       <ViewerToolbar />
@@ -346,11 +333,6 @@ export function Viewer3D() {
       )}
 
       <AnnotationDetailPanel />
-
-      <div className="export-toolbar">
-        <button type="button">Screenshot</button>
-        <button type="button">GLB Export</button>
-      </div>
 
       <div className="canvas-wrap">
         <div className="viewer3d-scene">
