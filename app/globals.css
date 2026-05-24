@@ -425,6 +425,19 @@ a {
   position: absolute;
   inset: 178px 22px 120px;
   z-index: 1;
+  overflow: hidden;
+  border-radius: 6px;
+  background: radial-gradient(ellipse 60% 70% at 50% 50%, #fff9f2 0%, #e8dfc8 100%);
+}
+
+.canvas-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.08) 100%);
 }
 
 .viewer3d-scene,

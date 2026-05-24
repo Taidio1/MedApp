@@ -359,14 +359,13 @@ export function Viewer3D() {
             gl={{ antialias: true, alpha: true, localClippingEnabled: true }}
             style={{ width: '100%', height: '100%' }}
           >
-            <color attach="background" args={['#fbf7ee']} />
-            <fog attach="fog" args={['#fbf7ee', 9, 18]} />
+            <color attach="background" args={['#fff9f2']} />
+            <fog attach="fog" args={['#fff9f2', 9, 18]} />
 
-            <ambientLight intensity={1.24} />
-            <hemisphereLight args={['#fff8ea', '#e3ded2', 1.16]} />
-            <directionalLight position={[4.2, 5.2, 5.8]} intensity={2.5} />
-            <directionalLight position={[-4.4, 2.2, 3.6]} intensity={0.54} color="#fff1df" />
-            <pointLight position={[2.8, -1.2, 3.2]} intensity={0.55} color="#ffffff" />
+            <ambientLight intensity={0.45} />
+            <hemisphereLight args={['#fff8ea', '#e3ded2', 0.7]} />
+            <directionalLight position={[3, 4, 4]} intensity={1.8} />
+            <directionalLight position={[-3, -1, 2]} intensity={0.4} color="#fff1df" />
 
             <Suspense fallback={null}>
               {hasLayers && selectedStructure?.layers ? (
