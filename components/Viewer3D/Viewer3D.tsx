@@ -282,6 +282,48 @@ function CameraResetWatcher() {
 
 // ─── Main Viewer ──────────────────────────────────────────────────────────────
 
+const LEGEND_COLORS: Record<string, string> = {
+  organ:      '#e05252',
+  vessels:    '#4a7fc1',
+  nerves:     '#d4a017',
+  clinical:   '#d07a30',
+  topography: '#4a9e6b',
+}
+
+const LEGEND_LABELS: Record<string, string> = {
+  organ:      'Organ',
+  vessels:    'Naczynia',
+  nerves:     'Nerwy',
+  clinical:   'Kliniczne',
+  topography: 'Topografia',
+}
+
+function AnnotationLegend() {
+  const selectedStructure = useAppStore((s) => s.selectedStructure)
+
+  if (!selectedStructure) return null
+
+  const usedLayers = Array.from(
+    new Set(selectedStructure.annotations.flatMap((a) => a.layerIds ?? []))
+  )
+
+  if (usedLayers.length === 0) return null
+
+  return (
+    <div className="annotation-legend">
+      {usedLayers.map((layer) => (
+        <div key={layer} className="annotation-legend-item">
+          <span
+            className="annotation-legend-dot"
+            style={{ background: LEGEND_COLORS[layer] ?? '#fbbf24' }}
+          />
+          <span>{LEGEND_LABELS[layer] ?? layer}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function ViewerWelcome() {
   const steps = [
     { num: '1', text: 'Rozwiń kategorię w lewym panelu' },
@@ -344,6 +386,7 @@ export function Viewer3D() {
       )}
 
       <AnnotationDetailPanel />
+      <AnnotationLegend />
 
       <div className="canvas-wrap">
         <LoadingOverlay />

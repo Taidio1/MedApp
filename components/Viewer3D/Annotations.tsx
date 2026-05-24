@@ -1,16 +1,43 @@
 'use client'
 
 import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useAppStore } from '@/lib/store'
 import { Annotation } from '@/lib/types'
 import { filterAnnotationsByLayers } from '@/lib/learning'
 
-// Jeden punkt anotacji wybierający stabilny panel opisu
+const LAYER_COLORS: Record<string, string> = {
+  organ:      '#e05252',
+  vessels:    '#4a7fc1',
+  nerves:     '#d4a017',
+  clinical:   '#d07a30',
+  topography: '#4a9e6b',
+}
+
+const ACTIVE_LAYER_COLORS: Record<string, string> = {
+  organ:      '#ea7878',
+  vessels:    '#7da7d9',
+  nerves:     '#ddbf56',
+  clinical:   '#de9e62',
+  topography: '#74bc8f',
+}
+
+const FALLBACK_COLOR = '#fbbf24'
+const FALLBACK_ACTIVE_COLOR = '#f59e0b'
+
+function getAnnotationColor(annotation: Annotation, active: boolean): string {
+  const firstLayer = annotation.layerIds?.[0]
+  if (!firstLayer) return active ? FALLBACK_ACTIVE_COLOR : FALLBACK_COLOR
+  return active
+    ? (ACTIVE_LAYER_COLORS[firstLayer] ?? FALLBACK_ACTIVE_COLOR)
+    : (LAYER_COLORS[firstLayer] ?? FALLBACK_COLOR)
+}
+
 function AnnotationPoint({ annotation }: { annotation: Annotation }) {
   const { activeAnnotation, setActiveAnnotation, setSelectedStructure, structures } = useAppStore()
   const isActive = activeAnnotation?.id === annotation.id
+  const [isHovered, setIsHovered] = useState(false)
   const baseSize = annotation.size ?? 0.08
   const pointRef = useRef<THREE.Mesh>(null)
   const haloRef = useRef<THREE.Mesh>(null)
@@ -21,22 +48,20 @@ function AnnotationPoint({ annotation }: { annotation: Annotation }) {
     const point = pointRef.current
     const halo = haloRef.current
     const haloMaterial = haloMaterialRef.current
-
     if (!point || !halo || !haloMaterial) return
 
-    const targetPointScale = isActive ? 1.35 : 1
+    const targetPointScale = isActive ? 1.35 : isHovered ? 1.15 : 1
     targetScaleRef.current.set(targetPointScale, targetPointScale, targetPointScale)
     point.scale.lerp(targetScaleRef.current, Math.min(delta * 12, 1))
 
     if (isActive) {
       const pulse = (Math.sin(clock.getElapsedTime() * 5) + 1) / 2
-      const haloScale = 1.2 + pulse * 0.45
-      halo.scale.setScalar(haloScale)
+      halo.scale.setScalar(1.2 + pulse * 0.45)
       haloMaterial.opacity = 0.16 + pulse * 0.22
     } else {
       targetScaleRef.current.set(1, 1, 1)
       halo.scale.lerp(targetScaleRef.current, Math.min(delta * 10, 1))
-      haloMaterial.opacity = 0.12
+      haloMaterial.opacity = isHovered ? 0.2 : 0.12
     }
   })
 
@@ -46,28 +71,28 @@ function AnnotationPoint({ annotation }: { annotation: Annotation }) {
     setActiveAnnotation(annotation)
   }
 
+  const dotColor = getAnnotationColor(annotation, isActive)
+  const firstLayer = annotation.layerIds?.[0]
+  const haloColor = firstLayer ? (LAYER_COLORS[firstLayer] ?? FALLBACK_COLOR) : FALLBACK_COLOR
+
   return (
     <group position={annotation.position}>
-      {/* Żółta kropka — klikalna */}
       <mesh
         ref={pointRef}
         renderOrder={20}
         onClick={handleClick}
-        onPointerOver={() => setActiveAnnotation(annotation)}
+        onPointerOver={() => setIsHovered(true)}
+        onPointerOut={() => setIsHovered(false)}
       >
         <sphereGeometry args={[baseSize, 12, 12]} />
-        <meshBasicMaterial
-          color={isActive ? '#f59e0b' : '#fbbf24'}
-          depthTest={false}
-        />
+        <meshBasicMaterial color={dotColor} depthTest={false} />
       </mesh>
 
-      {/* Pulsująca obwódka */}
       <mesh ref={haloRef} renderOrder={19}>
         <sphereGeometry args={[baseSize * 1.5, 12, 12]} />
         <meshBasicMaterial
           ref={haloMaterialRef}
-          color="#fbbf24"
+          color={haloColor}
           transparent
           opacity={0.12}
           depthTest={false}
@@ -77,7 +102,6 @@ function AnnotationPoint({ annotation }: { annotation: Annotation }) {
   )
 }
 
-/** Renderuje wszystkie anotacje dla aktualnie wybranej struktury */
 export function Annotations() {
   const { selectedStructure, activeAnnotationPointLayers } = useAppStore()
 

@@ -1641,3 +1641,37 @@ a {
     transform: scale(0.94) translateY(12px);
   }
 }
+
+/* ─── Annotation Legend ──────────────────────────────────────────────────── */
+
+.annotation-legend {
+  position: absolute;
+  z-index: 6;
+  right: 20px;
+  bottom: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(251, 247, 238, 0.88);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-soft);
+}
+
+.annotation-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.annotation-legend-dot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
