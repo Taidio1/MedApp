@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AnatomyNode, AnatomicalStructure } from '@/lib/types'
-import { buildAnatomyTree } from '@/lib/anatomyData'
+import { buildAnatomyTree, MODEL_IDS } from '@/lib/anatomyData'
 import { useAppStore } from '@/lib/store'
 import { LearningTabId, QuizScore } from '@/lib/learning'
 
@@ -118,8 +118,10 @@ function TreeNode({
   const hasChildren = Boolean(node.children && node.children.length > 0)
   const isActive = selectedStructureId === node.structureId
   const structure = node.structureId ? structures[node.structureId] : undefined
+  const hasModel = !node.structureId || MODEL_IDS.has(node.structureId)
 
   const handleClick = () => {
+    if (!hasModel) return
     if (hasChildren) setExpanded(prev => !prev)
     if (node.structureId && structures[node.structureId]) {
       setSelectedStructure(structures[node.structureId])
@@ -130,9 +132,11 @@ function TreeNode({
     <div>
       <button
         onClick={handleClick}
+        disabled={depth > 0 && !hasModel}
         className={[
           depth === 0 ? 'organelle-row' : 'structure-row',
           isActive ? 'is-active' : '',
+          depth > 0 && !hasModel ? 'is-soon' : '',
         ].join(' ')}
         style={
           depth === 0
@@ -164,10 +168,12 @@ function TreeNode({
                 <StudyProgressBar structure={structure} rememberedIds={rememberedIds} />
               )}
             </span>
-            <span className="structure-badge">
-              {structure
-                ? getStructureBadge(structure, tab, rememberedIds, quizScore, isActive)
-                : '–'}
+            <span className={['structure-badge', !hasModel ? 'structure-badge--soon' : ''].join(' ')}>
+              {!hasModel
+                ? 'soon'
+                : structure
+                  ? getStructureBadge(structure, tab, rememberedIds, quizScore, isActive)
+                  : '–'}
             </span>
           </>
         )}

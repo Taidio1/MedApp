@@ -1,5 +1,13 @@
 import { AnatomyNode, AnatomicalStructure } from './types'
 
+export const MODEL_IDS = new Set([
+  'serce',
+  'lung',
+  'stomach',
+  'liver',
+  'kidney',
+])
+
 export const SYSTEM_META = [
   { systemKey: 'Układ Krążenia',  label: 'Układ Krążenia',  icon: '♥',  order: 1 },
   { systemKey: 'Układ Oddechowy', label: 'Układ Oddechowy', icon: '🫁', order: 2 },

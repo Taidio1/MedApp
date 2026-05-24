@@ -778,6 +778,25 @@ a {
   color: var(--accent);
 }
 
+.structure-row.is-soon {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.structure-row.is-soon:hover {
+  transform: none;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.structure-badge--soon {
+  background: rgba(91, 78, 60, 0.06);
+  color: var(--muted);
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
 .difficulty-dots {
   display: flex;
   gap: 4px;
