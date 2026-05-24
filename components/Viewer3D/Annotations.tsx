@@ -5,6 +5,7 @@ import { useRef } from 'react'
 import * as THREE from 'three'
 import { useAppStore } from '@/lib/store'
 import { Annotation } from '@/lib/types'
+import { filterAnnotationsByLayers } from '@/lib/learning'
 
 // Jeden punkt anotacji wybierający stabilny panel opisu
 function AnnotationPoint({ annotation }: { annotation: Annotation }) {
@@ -78,7 +79,7 @@ function AnnotationPoint({ annotation }: { annotation: Annotation }) {
 
 /** Renderuje wszystkie anotacje dla aktualnie wybranej struktury */
 export function Annotations() {
-  const { selectedStructure } = useAppStore()
+  const { selectedStructure, activeAnnotationPointLayers } = useAppStore()
 
   if (!selectedStructure || selectedStructure.annotations.length === 0) {
     return null
@@ -86,11 +87,12 @@ export function Annotations() {
 
   return (
     <>
-      {selectedStructure.annotations
-        .filter((annotation) => annotation.visible !== false)
-        .map((annotation) => (
-          <AnnotationPoint key={annotation.id} annotation={annotation} />
-        ))}
+      {filterAnnotationsByLayers(
+        selectedStructure.annotations,
+        activeAnnotationPointLayers,
+      ).map((annotation) => (
+        <AnnotationPoint key={annotation.id} annotation={annotation} />
+      ))}
     </>
   )
 }
