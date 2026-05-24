@@ -21,15 +21,15 @@ export function UserMenu({ email, displayName, isAdmin }: UserMenuProps) {
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs text-gray-400 max-w-[160px] truncate">
+    <div className="user-menu">
+      <span className="user-menu-name">
         {displayName ?? email}
       </span>
 
       {isAdmin && (
         <Link
           href="/admin/annotations"
-          className="px-2 py-1 text-xs rounded bg-[#2a2a4e] text-[#a78bfa] hover:bg-[#3a3a6e] transition-colors"
+          className="user-menu-link"
         >
           Admin
         </Link>
@@ -37,7 +37,7 @@ export function UserMenu({ email, displayName, isAdmin }: UserMenuProps) {
 
       <button
         onClick={handleSignOut}
-        className="px-2 py-1 text-xs rounded bg-[#2a2a4e] text-gray-400 hover:text-white hover:bg-[#3a3a6e] transition-colors"
+        className="user-menu-button"
       >
         Wyloguj
       </button>

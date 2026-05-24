@@ -15,7 +15,7 @@ export function AnnotationLayerFilter({
   onEnableAll,
 }: AnnotationLayerFilterProps) {
   return (
-    <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
+    <div className="filter-row">
       {annotationPointLayers.map((layerId) => {
         const active = activeLayers.includes(layerId)
 
@@ -26,10 +26,8 @@ export function AnnotationLayerFilter({
             aria-pressed={active}
             onClick={() => onToggleLayer(layerId)}
             className={[
-              'h-7 flex-shrink-0 rounded-md border px-2.5 text-[10px] font-semibold transition-colors',
-              active
-                ? 'border-[#7c3aed] bg-[#ede9fe] text-[#5b21b6]'
-                : 'border-[#e5e7eb] bg-white text-[#6b7280] hover:border-[#c4b5fd]',
+              'filter-pill',
+              active ? 'is-active' : '',
             ].join(' ')}
           >
             {annotationPointLayerLabels[layerId]}
@@ -39,7 +37,7 @@ export function AnnotationLayerFilter({
       <button
         type="button"
         onClick={onEnableAll}
-        className="h-7 flex-shrink-0 rounded-md border border-[#e5e7eb] bg-white px-2.5 text-[10px] font-semibold text-[#6b7280] hover:border-[#c4b5fd]"
+        className="filter-pill"
       >
         Wszystkie
       </button>

@@ -36,7 +36,7 @@ export function StudyModePanel({
 
   if (annotations.length === 0) {
     return (
-      <div className="flex h-full items-center rounded-md border border-dashed border-[#d1d5db] px-4 text-xs text-[#9ca3af]">
+      <div className="empty-state min-h-[150px] rounded-md border border-dashed border-[#d1d5db]">
         Włącz warstwy z punktami, aby rozpocząć naukę.
       </div>
     )
@@ -50,7 +50,7 @@ export function StudyModePanel({
     .join(', ')
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-[1fr_auto] gap-3 rounded-md border border-[#e5e7eb] bg-white p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+    <div className="study-card grid min-h-0 grid-cols-[1fr_auto] gap-3 p-3">
       <div className="min-w-0">
         <p className="text-[9px] font-semibold uppercase tracking-widest text-[#9ca3af]">
           Krok {safeIndex + 1} z {annotations.length} · {layers}
@@ -73,7 +73,7 @@ export function StudyModePanel({
             'h-8 rounded-md border text-[11px] font-semibold',
             remembered
               ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
-              : 'border-[#e5e7eb] bg-[#f9fafb] text-[#6b7280]',
+              : 'border-[#d8cfbf] bg-white/45 text-[#6b6257]',
           ].join(' ')}
         >
           {remembered ? 'Zapamiętane' : 'Oznacz jako znane'}
@@ -82,14 +82,14 @@ export function StudyModePanel({
           <button
             type="button"
             onClick={() => onSetStudyIndex(Math.max(0, safeIndex - 1))}
-            className="h-8 rounded-md border border-[#e5e7eb] bg-[#f9fafb] text-[11px] font-semibold text-[#6b7280]"
+            className="h-8 rounded-md border border-[#d8cfbf] bg-white/45 text-[11px] font-semibold text-[#6b6257]"
           >
             Wstecz
           </button>
           <button
             type="button"
             onClick={() => onSetStudyIndex((safeIndex + 1) % annotations.length)}
-            className="h-8 rounded-md bg-[#7c3aed] text-[11px] font-semibold text-white"
+            className="primary-action h-8 text-[11px]"
           >
             Dalej
           </button>

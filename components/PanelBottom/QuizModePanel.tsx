@@ -42,7 +42,7 @@ export function QuizModePanel({
 
   if (annotations.length === 0) {
     return (
-      <div className="flex h-full items-center rounded-md border border-dashed border-[#d1d5db] px-4 text-xs text-[#9ca3af]">
+      <div className="empty-state min-h-[150px] rounded-md border border-dashed border-[#d1d5db]">
         Quiz potrzebuje widocznych punktów z wybranych warstw.
       </div>
     )
@@ -50,7 +50,7 @@ export function QuizModePanel({
 
   if (!question) {
     return (
-      <div className="flex h-full items-center rounded-md border border-dashed border-[#d1d5db] px-4 text-xs text-[#9ca3af]">
+      <div className="empty-state min-h-[150px] rounded-md border border-dashed border-[#d1d5db]">
         Ten zestaw potrzebuje co najmniej dwóch odpowiedzi do quizu.
       </div>
     )
@@ -75,7 +75,7 @@ export function QuizModePanel({
 
   return (
     <div className="grid min-h-0 flex-1 grid-cols-[1fr_170px] gap-3">
-      <div className="rounded-md border border-[#e5e7eb] bg-white p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+      <div className="quiz-card p-3">
         <p className="text-[9px] font-semibold uppercase tracking-widest text-[#9ca3af]">
           Pytanie {score.answered + 1}
         </p>
@@ -105,7 +105,7 @@ export function QuizModePanel({
           })}
         </div>
       </div>
-      <div className="flex flex-col gap-2 rounded-md border border-[#e5e7eb] bg-white p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+      <div className="quiz-card flex flex-col gap-2 p-3">
         <p className="text-[9px] font-semibold uppercase tracking-widest text-[#9ca3af]">
           Wynik
         </p>
@@ -121,7 +121,7 @@ export function QuizModePanel({
         <button
           type="button"
           onClick={handleNext}
-          className="mt-auto h-8 rounded-md bg-[#7c3aed] text-[11px] font-semibold text-white"
+          className="primary-action mt-auto h-8 text-[11px]"
         >
           Następne
         </button>

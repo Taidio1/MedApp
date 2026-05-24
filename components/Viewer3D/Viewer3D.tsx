@@ -1,10 +1,10 @@
 'use client'
 
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { ContactShadows, OrbitControls } from '@react-three/drei'
 import { Suspense, useRef, useEffect, useState } from 'react'
 import * as THREE from 'three'
-import { ModelLoader, PlaceholderMesh } from './ModelLoader'
+import { ModelLoader } from './ModelLoader'
 import { LayeredModel } from './LayeredModel'
 import { LayerPanel } from './LayerPanel'
 import { Annotations } from './Annotations'
@@ -58,33 +58,10 @@ function ViewerToolbar() {
   }
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: '12px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 10,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '6px',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          background: 'rgba(0,0,0,0.4)',
-          backdropFilter: 'blur(8px)',
-          borderRadius: '999px',
-          padding: '6px 12px',
-          border: '1px solid rgba(255,255,255,0.1)',
-        }}
-      >
+    <>
+      <div className="viewer-toolbar">
         <ToolbarBtn
-          label="Rotate"
+          label="Obrót"
           active={autoRotate}
           onClick={() => setAutoRotate(!autoRotate)}
         />
@@ -95,23 +72,23 @@ function ViewerToolbar() {
           onClick={handleSplit}
         />
         <ToolbarBtn
-          label="Explode"
+          label="Rozsuń"
           active={showExplodeSlider}
           disabled={!hasLayers}
           onClick={handleExplode}
         />
         <ToolbarBtn
-          label="Cross-Section"
+          label="Wycinek"
           active={showClipSlider}
           disabled={!hasLayers}
           onClick={handleCrossSection}
         />
-        <ToolbarBtn label="Reset View" onClick={handleReset} />
+        <ToolbarBtn label="Reset" onClick={handleReset} />
       </div>
 
       {showExplodeSlider && (
         <SliderRow
-          label="Explode"
+          label="Rozsunięcie"
           min={0}
           max={1}
           step={0.01}
@@ -122,7 +99,7 @@ function ViewerToolbar() {
 
       {showClipSlider && (
         <SliderRow
-          label="Cross-Section"
+          label="Wycinek"
           min={-3}
           max={3}
           step={0.05}
@@ -130,7 +107,7 @@ function ViewerToolbar() {
           onChange={(v) => setClippingPlaneY(v)}
         />
       )}
-    </div>
+    </>
   )
 }
 
@@ -149,20 +126,7 @@ function ToolbarBtn({
     <button
       onClick={onClick}
       disabled={disabled}
-      style={{
-        padding: '4px 12px',
-        fontSize: '11px',
-        borderRadius: '999px',
-        border: 'none',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        transition: 'all 0.15s',
-        background: active ? '#7c3aed' : 'transparent',
-        color: disabled
-          ? 'rgba(255,255,255,0.25)'
-          : active
-          ? 'white'
-          : 'rgba(255,255,255,0.7)',
-      }}
+      className={active ? 'is-active' : undefined}
     >
       {label}
     </button>
@@ -185,21 +149,8 @@ function SliderRow({
   onChange: (v: number) => void
 }) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        background: 'rgba(0,0,0,0.4)',
-        backdropFilter: 'blur(8px)',
-        borderRadius: '999px',
-        padding: '5px 14px',
-        border: '1px solid rgba(255,255,255,0.1)',
-      }}
-    >
-      <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', whiteSpace: 'nowrap' }}>
-        {label}
-      </span>
+    <div className="slider-popover">
+      <span>{label}</span>
       <input
         type="range"
         min={min}
@@ -207,7 +158,6 @@ function SliderRow({
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        style={{ width: '120px', accentColor: '#7c3aed' }}
       />
     </div>
   )
@@ -217,29 +167,28 @@ function SliderRow({
 
 function AnnotationDetailPanel() {
   const activeAnnotation = useAppStore((state) => state.activeAnnotation)
+  const setActiveAnnotation = useAppStore((state) => state.setActiveAnnotation)
 
   if (!activeAnnotation) return null
 
   return (
-    <aside
-      className="absolute right-4 top-[86px] z-10 w-[260px] rounded-lg border border-[#7c3aed]/50 bg-[#f8f5ef] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.28)]"
-      aria-live="polite"
-    >
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-[#7c3aed]">
-        Aktywny punkt
-      </p>
-      <h2 className="mt-2 text-base font-bold leading-tight text-[#111827]">
-        {activeAnnotation.label}
-      </h2>
+    <aside className="annotation-detail-panel" aria-live="polite">
+      <div className="annotation-detail-header">
+        <span className="annotation-detail-label">Aktywny punkt</span>
+        <button
+          className="annotation-close-btn"
+          onClick={() => setActiveAnnotation(null)}
+          aria-label="Zamknij"
+        >
+          ✕
+        </button>
+      </div>
+      <h2 className="annotation-detail-name">{activeAnnotation.label}</h2>
       {activeAnnotation.nameLAT && (
-        <p className="mt-1 text-xs italic text-[#6d28d9]">
-          {activeAnnotation.nameLAT}
-        </p>
+        <p className="annotation-detail-lat">{activeAnnotation.nameLAT}</p>
       )}
       {activeAnnotation.description && (
-        <p className="mt-3 text-xs leading-relaxed text-[#4b5563]">
-          {activeAnnotation.description}
-        </p>
+        <p className="annotation-detail-desc">{activeAnnotation.description}</p>
       )}
     </aside>
   )
@@ -314,8 +263,37 @@ function CameraResetWatcher() {
 
 // ─── Main Viewer ──────────────────────────────────────────────────────────────
 
+function ViewerWelcome() {
+  const steps = [
+    { num: '1', text: 'Rozwiń kategorię w lewym panelu' },
+    { num: '2', text: 'Kliknij strukturę, by załadować model 3D' },
+    { num: '3', text: 'Obracaj, powiększaj i eksploruj anatomię' },
+  ]
+
+  return (
+    <div className="viewer-welcome">
+      <div className="viewer-welcome-glow" aria-hidden="true" />
+      <div className="viewer-welcome-icon" aria-hidden="true">✧</div>
+      <h2 className="viewer-welcome-title">Atlas Anatomii 3D</h2>
+      <p className="viewer-welcome-sub">
+        Interaktywny atlas ciała ludzkiego w trójwymiarze
+      </p>
+      <div className="viewer-welcome-divider" aria-hidden="true" />
+      <p className="viewer-welcome-hint">Jak zacząć?</p>
+      <ol className="viewer-welcome-steps">
+        {steps.map((s, i) => (
+          <li key={i} className="viewer-welcome-step">
+            <span className="viewer-welcome-step-num">{s.num}</span>
+            <span className="viewer-welcome-step-text">{s.text}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
 export function Viewer3D() {
-  const { selectedStructure, autoRotate } = useAppStore()
+  const { selectedStructure, autoRotate, clippingPlaneY } = useAppStore()
 
   const modelUrl = selectedStructure
     ? `/models/${selectedStructure.id}.glb`
@@ -323,11 +301,44 @@ export function Viewer3D() {
 
   const hasLayers = !!(selectedStructure?.layers?.length)
 
+  if (!modelUrl) {
+    return (
+      <main className="stage-panel stage-panel--empty">
+        <ViewerWelcome />
+      </main>
+    )
+  }
+
   return (
-    <div
-      className="viewer3d-scene"
-      style={{ position: 'relative', width: '100%', height: '100%', background: '#f4f1ea' }}
-    >
+    <main className="stage-panel">
+      <div className="stage-title">
+        <div>
+          <h2>{selectedStructure?.namePL ?? 'Atlas 3D'}</h2>
+          <p>{selectedStructure?.nameLAT ?? 'Wybierz strukturę z panelu po lewej'}</p>
+        </div>
+
+        <div className="view-card">
+          <span className="view-card-title">View Mode</span>
+          <div className="mode-switcher">
+            <button type="button" className="mode-button is-active" title="Mesh">
+              Mesh
+            </button>
+            <button
+              type="button"
+              className={clippingPlaneY !== null ? 'mode-button is-active' : 'mode-button'}
+              title="Wycinek"
+            >
+              Focus
+            </button>
+          </div>
+          <label className="toggle-line">
+            <span>Cross Section</span>
+            <input type="checkbox" checked={clippingPlaneY !== null} readOnly />
+            <i className="toggle-track" />
+          </label>
+        </div>
+      </div>
+
       <ViewerToolbar />
 
       {hasLayers && selectedStructure?.layers && (
@@ -336,96 +347,64 @@ export function Viewer3D() {
 
       <AnnotationDetailPanel />
 
-      {!modelUrl && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '24px',
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-            pointerEvents: 'none',
-            zIndex: 1,
-          }}
-        >
-          <p style={{ color: '#6b5f78', fontSize: '11px' }}>
-            Wgraj model{' '}
-            <code style={{ background: '#e7e0d6', padding: '0 4px', borderRadius: '3px' }}>
-              .glb
-            </code>{' '}
-            do{' '}
-            <code style={{ background: '#e7e0d6', padding: '0 4px', borderRadius: '3px' }}>
-              /public/models/
-            </code>
-          </p>
-        </div>
-      )}
+      <div className="export-toolbar">
+        <button type="button">Screenshot</button>
+        <button type="button">GLB Export</button>
+      </div>
 
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '64px',
-          background: 'linear-gradient(to top, rgba(244,241,234,0.95), transparent)',
-          pointerEvents: 'none',
-          zIndex: 1,
-        }}
-      />
+      <div className="canvas-wrap">
+        <div className="viewer3d-scene">
+          <Canvas
+            camera={{ position: [0, 1.2, 5.8], fov: 38 }}
+            gl={{ antialias: true, alpha: true, localClippingEnabled: true }}
+            style={{ width: '100%', height: '100%' }}
+          >
+            <color attach="background" args={['#fbf7ee']} />
+            <fog attach="fog" args={['#fbf7ee', 9, 18]} />
 
-      <Canvas
-        camera={{ position: [0, 1.2, 5], fov: 50 }}
-        gl={{ antialias: true, alpha: false, localClippingEnabled: true }}
-        style={{ width: '100%', height: '100%' }}
-      >
-        <color attach="background" args={['#f4f1ea']} />
-        <fog attach="fog" args={['#f4f1ea', 8, 16]} />
+            <ambientLight intensity={1.24} />
+            <hemisphereLight args={['#fff8ea', '#e3ded2', 1.16]} />
+            <directionalLight position={[4.2, 5.2, 5.8]} intensity={2.5} />
+            <directionalLight position={[-4.4, 2.2, 3.6]} intensity={0.54} color="#fff1df" />
+            <pointLight position={[2.8, -1.2, 3.2]} intensity={0.55} color="#ffffff" />
 
-        <ambientLight intensity={0.65} />
-        <directionalLight position={[5, 10, 5]} intensity={1.1} />
-        <directionalLight position={[-5, -5, -5]} intensity={0.35} />
+            <Suspense fallback={null}>
+              {hasLayers && selectedStructure?.layers ? (
+                <LayeredModel
+                  key={modelUrl}
+                  url={modelUrl}
+                  layers={selectedStructure.layers}
+                />
+              ) : (
+                <ModelLoader key={modelUrl} url={modelUrl} />
+              )}
+              <ContactShadows
+                position={[0, -1.55, 0]}
+                opacity={0.24}
+                scale={7.2}
+                blur={2.6}
+                far={4.2}
+              />
+            </Suspense>
 
-        <mesh position={[0, -1.35, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[16, 16]} />
-          <meshStandardMaterial color="#eee8dc" roughness={1} />
-        </mesh>
-        <gridHelper
-          args={[16, 8, '#6b7280', '#b8b2a8']}
-          position={[0, -1.34, 0]}
-        />
+            <Annotations />
+            <WASDControls />
+            <CameraResetWatcher />
 
-        <Suspense fallback={null}>
-          {modelUrl && hasLayers && selectedStructure?.layers ? (
-            <LayeredModel
-              key={modelUrl}
-              url={modelUrl}
-              layers={selectedStructure.layers}
+            <OrbitControls
+              makeDefault
+              autoRotate={autoRotate}
+              autoRotateSpeed={0.7}
+              minDistance={3.2}
+              maxDistance={8.4}
+              enablePan
+              panSpeed={0.5}
+              enableDamping
+              dampingFactor={0.08}
             />
-          ) : modelUrl ? (
-            <ModelLoader key={modelUrl} url={modelUrl} />
-          ) : (
-            <PlaceholderMesh />
-          )}
-        </Suspense>
-
-        <Annotations />
-        <WASDControls />
-        <CameraResetWatcher />
-
-        <OrbitControls
-          makeDefault
-          autoRotate={autoRotate}
-          autoRotateSpeed={2}
-          minDistance={1}
-          maxDistance={20}
-          enablePan
-          panSpeed={0.5}
-          enableDamping
-          dampingFactor={0.05}
-        />
-      </Canvas>
-    </div>
+          </Canvas>
+        </div>
+      </div>
+    </main>
   )
 }
