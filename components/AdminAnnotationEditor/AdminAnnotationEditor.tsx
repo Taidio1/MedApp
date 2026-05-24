@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Annotation,
@@ -343,7 +344,13 @@ export function AdminAnnotationEditor() {
         <div className="rounded border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-200">
           development only
         </div>
-        <div className="ml-auto text-[11px] text-slate-400">
+        <Link
+          href="/"
+          className="ml-auto rounded border border-[#334155] px-3 py-1.5 text-xs font-semibold text-slate-200 transition-colors hover:border-[#fbbf24] hover:text-[#fbbf24]"
+        >
+          Wróć do learnera
+        </Link>
+        <div className="text-[11px] text-slate-400">
           {saveState === 'idle' && 'Bez zmian'}
           {saveState === 'dirty' && 'Oczekuje na zapis...'}
           {saveState === 'saving' && 'Zapisuję...'}
