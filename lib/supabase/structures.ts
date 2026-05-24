@@ -1,5 +1,11 @@
 import { SupabaseClient } from '@supabase/supabase-js'
-import { AnatomicalStructure, Annotation, AnatomyLayer } from '@/lib/types'
+import {
+  AnatomicalStructure,
+  Annotation,
+  AnnotationDifficulty,
+  AnnotationPointLayer,
+  AnatomyLayer,
+} from '@/lib/types'
 
 interface LayerRow {
   layer_key: string
@@ -22,6 +28,10 @@ interface AnnotationRow {
   position: number[]
   size: number
   visible: boolean
+  layer_ids: string[] | null
+  quiz_prompt: string | null
+  accepted_answers: string[] | null
+  difficulty: string | null
 }
 
 interface StructureRow {
@@ -49,7 +59,33 @@ function mapLayer(row: LayerRow): AnatomyLayer {
   }
 }
 
+const allowedPointLayers = new Set([
+  'organ',
+  'vessels',
+  'nerves',
+  'clinical',
+  'topography',
+])
+
+const allowedDifficulties = new Set(['basic', 'intermediate', 'exam'])
+
+function mapLayerIds(value: string[] | null): AnnotationPointLayer[] {
+  const layers = (value ?? []).filter((layer): layer is AnnotationPointLayer =>
+    allowedPointLayers.has(layer),
+  )
+
+  return layers.length > 0 ? layers : ['organ']
+}
+
+function mapDifficulty(value: string | null): AnnotationDifficulty | undefined {
+  return value != null && allowedDifficulties.has(value)
+    ? (value as AnnotationDifficulty)
+    : undefined
+}
+
 function mapAnnotation(row: AnnotationRow, structureId: string): Annotation {
+  const difficulty = mapDifficulty(row.difficulty)
+
   return {
     id: row.annotation_key,
     label: row.label,
@@ -58,6 +94,10 @@ function mapAnnotation(row: AnnotationRow, structureId: string): Annotation {
     position: row.position as [number, number, number],
     size: row.size,
     visible: row.visible,
+    layerIds: mapLayerIds(row.layer_ids),
+    ...(row.quiz_prompt != null ? { quizPrompt: row.quiz_prompt } : {}),
+    ...(row.accepted_answers != null ? { acceptedAnswers: row.accepted_answers } : {}),
+    ...(difficulty ? { difficulty } : {}),
     structureId,
   }
 }
@@ -70,7 +110,7 @@ export async function fetchStructures(
     .select(`
       id, name_pl, name_lat, anatomical_system, description, biological_notes,
       anatomy_layers (layer_key, label, default_visible, is_pair, split_axis, split_distance, split_direction, explode_offset, base_position, sort_order),
-      annotations (annotation_key, label, name_lat, description, position, size, visible)
+      annotations (annotation_key, label, name_lat, description, position, size, visible, layer_ids, quiz_prompt, accepted_answers, difficulty)
     `)
     .eq('is_published', true)
     .order('sort_order')

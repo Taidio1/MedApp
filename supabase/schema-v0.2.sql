@@ -259,13 +259,22 @@ create table if not exists public.annotations (
   position double precision[] not null,
   size numeric(5, 3) not null default 0.08,
   visible boolean not null default true,
+  layer_ids text[] not null default array['organ']::text[],
+  quiz_prompt text,
+  accepted_answers text[] not null default array[]::text[],
+  difficulty text check (difficulty in ('basic', 'intermediate', 'exam')),
   is_premium boolean not null default false,
   created_by uuid references public.users(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint annotations_structure_key_unique unique (structure_id, annotation_key),
   constraint annotations_position_len check (cardinality(position) = 3),
-  constraint annotations_size_range check (size >= 0.02 and size <= 0.25)
+  constraint annotations_size_range check (size >= 0.02 and size <= 0.25),
+  constraint annotations_layer_ids_allowed
+    check (
+      layer_ids <@ array['organ', 'vessels', 'nerves', 'clinical', 'topography']::text[]
+      and cardinality(layer_ids) >= 1
+    )
 );
 
 create index if not exists annotations_structure_idx
@@ -819,7 +828,11 @@ insert into public.annotations (
   description,
   position,
   size,
-  visible
+  visible,
+  layer_ids,
+  quiz_prompt,
+  accepted_answers,
+  difficulty
 ) values
   (
     'kora-mozgowa',
@@ -829,7 +842,11 @@ insert into public.annotations (
     'Nowy punkt',
     array[-0.915, 0.986, 0.728]::double precision[],
     0.03,
-    true
+    true,
+    array['organ']::text[],
+    null,
+    array[]::text[],
+    'basic'
   ),
   (
     'liver',
@@ -839,7 +856,11 @@ insert into public.annotations (
     null,
     array[0.511, 0.266, 1.0]::double precision[],
     0.03,
-    true
+    true,
+    array['organ']::text[],
+    null,
+    array[]::text[],
+    'basic'
   )
 on conflict (structure_id, annotation_key) do update set
   label = excluded.label,
@@ -847,7 +868,11 @@ on conflict (structure_id, annotation_key) do update set
   description = excluded.description,
   position = excluded.position,
   size = excluded.size,
-  visible = excluded.visible;
+  visible = excluded.visible,
+  layer_ids = excluded.layer_ids,
+  quiz_prompt = excluded.quiz_prompt,
+  accepted_answers = excluded.accepted_answers,
+  difficulty = excluded.difficulty;
 
 commit;
 
