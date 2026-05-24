@@ -1,69 +1,81 @@
-import { readFileSync, readdirSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const projectRoot = process.cwd()
-const anatomySource = readFileSync(
-  join(projectRoot, 'lib', 'anatomyData.ts'),
-  'utf8',
-)
-const modelIds = readdirSync(join(projectRoot, 'public', 'models'))
-  .filter((fileName) => fileName.endsWith('.glb'))
-  .map((fileName) => fileName.replace(/\.glb$/, ''))
+const allowedPointLayers = new Set([
+  'organ',
+  'vessels',
+  'nerves',
+  'clinical',
+  'topography',
+])
+const allowedDifficulties = new Set(['basic', 'intermediate', 'exam'])
 
-function findStructureBlock(source, id) {
-  const quotedKeys = [`'${id}'`, `"${id}"`, id]
-  const keyIndex = quotedKeys
-    .map((key) => source.indexOf(`${key}: {`))
-    .find((index) => index >= 0)
-
-  if (keyIndex == null) return null
-
-  const start = source.indexOf('{', keyIndex)
-  let depth = 0
-  let inString = null
-  let escaped = false
-
-  for (let index = start; index < source.length; index += 1) {
-    const char = source[index]
-
-    if (inString) {
-      if (escaped) {
-        escaped = false
-      } else if (char === '\\') {
-        escaped = true
-      } else if (char === inString) {
-        inString = null
-      }
-      continue
-    }
-
-    if (char === "'" || char === '"' || char === '`') {
-      inString = char
-    } else if (char === '{') {
-      depth += 1
-    } else if (char === '}') {
-      depth -= 1
-      if (depth === 0) return source.slice(start, index + 1)
-    }
-  }
-
-  return null
+function read(path) {
+  return readFileSync(join(projectRoot, path), 'utf8')
 }
 
-const missing = modelIds.filter((id) => {
-  const block = findStructureBlock(anatomySource, id)
+function extractArrayValues(source, propertyName) {
+  const matches = [...source.matchAll(new RegExp(`${propertyName}:\\s*\\[([^\\]]*)\\]`, 'g'))]
+  return matches.flatMap((match) =>
+    match[1]
+      .split(',')
+      .map((value) => value.trim().replace(/^['"]|['"]$/g, ''))
+      .filter(Boolean),
+  )
+}
 
-  if (!block) return true
+const typeSource = read('lib/types.ts')
+const learningSource = read('lib/learning.ts')
+const schemaSource = read('supabase/schema-v0.2.sql')
 
-  const annotationCount = (block.match(/id:\s*['"]ann-/g) ?? []).length
-  return annotationCount < 3
-})
+const typeLayers = extractArrayValues(typeSource, 'annotationPointLayers')
+const invalidTypeLayers = typeLayers.filter((layerId) => !allowedPointLayers.has(layerId))
 
-if (missing.length > 0) {
+if (invalidTypeLayers.length > 0) {
   console.error(
-    `Modele 3D bez minimum 3 anotacji edukacyjnych: ${missing.join(', ')}`,
+    `Nieprawidlowe warstwy punktow w lib/types.ts: ${invalidTypeLayers.join(', ')}`,
   )
   process.exit(1)
 }
 
-console.log('Dane edukacyjne OK: kazdy dostepny model ma minimum 3 anotacje.')
+const typeDifficulties = extractArrayValues(typeSource, 'annotationDifficulties')
+const invalidDifficulties = typeDifficulties.filter(
+  (difficulty) => !allowedDifficulties.has(difficulty),
+)
+
+if (invalidDifficulties.length > 0) {
+  console.error(
+    `Nieprawidlowe poziomy trudnosci w lib/types.ts: ${invalidDifficulties.join(', ')}`,
+  )
+  process.exit(1)
+}
+
+for (const layerId of allowedPointLayers) {
+  if (!learningSource.includes(`${layerId}:`)) {
+    console.error(`Brak etykiety warstwy punktow w lib/learning.ts: ${layerId}`)
+    process.exit(1)
+  }
+}
+
+const learningColumns = [
+  'layer_ids',
+  'quiz_prompt',
+  'accepted_answers',
+  'difficulty',
+]
+const presentLearningColumns = learningColumns.filter((column) =>
+  schemaSource.includes(column),
+)
+
+if (
+  presentLearningColumns.length > 0 &&
+  presentLearningColumns.length !== learningColumns.length
+) {
+  console.error(
+    'Schemat Supabase zawiera tylko czesc kolumn metadanych nauki.',
+  )
+  process.exit(1)
+}
+
+console.log('Dane edukacyjne OK: metadane nauki i warstwy punktow sa spojne.')

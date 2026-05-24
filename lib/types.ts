@@ -1,5 +1,23 @@
 // Typy współdzielone przez frontend i logikę aplikacji
 
+export const annotationPointLayers = [
+  'organ',
+  'vessels',
+  'nerves',
+  'clinical',
+  'topography',
+] as const
+
+export type AnnotationPointLayer = (typeof annotationPointLayers)[number]
+
+export const annotationDifficulties = [
+  'basic',
+  'intermediate',
+  'exam',
+] as const
+
+export type AnnotationDifficulty = (typeof annotationDifficulties)[number]
+
 /** Punkt anotacji w przestrzeni 3D */
 export interface Annotation {
   id: string
@@ -8,6 +26,10 @@ export interface Annotation {
   description?: string
   size?: number
   visible?: boolean
+  layerIds?: AnnotationPointLayer[]
+  quizPrompt?: string
+  acceptedAnswers?: string[]
+  difficulty?: AnnotationDifficulty
   /** Pozycja XYZ w przestrzeni Three.js */
   position: [number, number, number]
   structureId: string
