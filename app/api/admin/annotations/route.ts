@@ -1,9 +1,47 @@
+import fs from 'fs'
+import path from 'path'
 import { createSupabaseServerClient } from '@/lib/auth/server'
 import { getCurrentUserProfile } from '@/lib/auth/guards'
+import {
+  AnnotationDifficulty,
+  AnnotationPointLayer,
+  annotationDifficulties,
+  annotationPointLayers,
+} from '@/lib/types'
+
+function hasModel(structureId: string): boolean {
+  const file = path.join(process.cwd(), 'public', 'models', `${structureId}.glb`)
+  return fs.existsSync(file)
+}
 
 const MIN_POINT_SIZE = 0.02
 const MAX_POINT_SIZE = 0.25
 const DEFAULT_POINT_SIZE = 0.08
+const allowedPointLayers = new Set<string>(annotationPointLayers)
+const allowedDifficulties = new Set<string>(annotationDifficulties)
+
+function sanitizeLayerIds(value: unknown): AnnotationPointLayer[] {
+  if (!Array.isArray(value)) return ['organ']
+  const layers = value.filter(
+    (layer): layer is AnnotationPointLayer =>
+      typeof layer === 'string' && allowedPointLayers.has(layer),
+  )
+  return layers.length > 0 ? layers : ['organ']
+}
+
+function sanitizeAcceptedAnswers(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value
+    .filter((answer): answer is string => typeof answer === 'string')
+    .map((answer) => answer.trim())
+    .filter(Boolean)
+}
+
+function sanitizeDifficulty(value: unknown): AnnotationDifficulty {
+  return typeof value === 'string' && allowedDifficulties.has(value)
+    ? (value as AnnotationDifficulty)
+    : 'basic'
+}
 
 interface AnnotationRecord {
   id: string
@@ -13,6 +51,10 @@ interface AnnotationRecord {
   position: [number, number, number]
   size?: number
   visible?: boolean
+  layerIds?: AnnotationPointLayer[]
+  quizPrompt?: string
+  acceptedAnswers?: string[]
+  difficulty?: AnnotationDifficulty
 }
 
 async function rejectNonAdmin(): Promise<Response | null> {
@@ -41,20 +83,22 @@ export async function GET() {
         .order('sort_order'),
       supabase
         .from('annotations')
-        .select('structure_id, annotation_key, label, name_lat, description, position, size, visible')
+        .select('structure_id, annotation_key, label, name_lat, description, position, size, visible, layer_ids, quiz_prompt, accepted_answers, difficulty')
         .order('structure_id'),
     ])
 
     if (structuresResult.error) throw new Error(structuresResult.error.message)
     if (annotationsResult.error) throw new Error(annotationsResult.error.message)
 
-    const structures = (structuresResult.data ?? []).map((s: Record<string, unknown>) => ({
-      id: s.id as string,
-      namePL: s.name_pl as string,
-      nameLAT: s.name_lat as string,
-      system: s.anatomical_system as string,
-      hasLayers: Array.isArray(s.anatomy_layers) && (s.anatomy_layers as unknown[]).length > 0,
-    }))
+    const structures = (structuresResult.data ?? [])
+      .filter((s: Record<string, unknown>) => hasModel(s.id as string))
+      .map((s: Record<string, unknown>) => ({
+        id: s.id as string,
+        namePL: s.name_pl as string,
+        nameLAT: s.name_lat as string,
+        system: s.anatomical_system as string,
+        hasLayers: Array.isArray(s.anatomy_layers) && (s.anatomy_layers as unknown[]).length > 0,
+      }))
 
     const annotations: Record<string, AnnotationRecord[]> = {}
     for (const row of (annotationsResult.data ?? []) as Record<string, unknown>[]) {
@@ -68,6 +112,10 @@ export async function GET() {
         position: row.position as [number, number, number],
         size: row.size as number,
         visible: row.visible as boolean,
+        layerIds: sanitizeLayerIds(row.layer_ids),
+        ...(row.quiz_prompt != null ? { quizPrompt: row.quiz_prompt as string } : {}),
+        acceptedAnswers: sanitizeAcceptedAnswers(row.accepted_answers),
+        difficulty: sanitizeDifficulty(row.difficulty),
       })
     }
 
@@ -123,6 +171,12 @@ export async function PUT(request: Request) {
           ? Math.min(MAX_POINT_SIZE, Math.max(MIN_POINT_SIZE, a.size))
           : DEFAULT_POINT_SIZE,
         visible: a.visible !== false,
+        layer_ids: sanitizeLayerIds(a.layerIds),
+        quiz_prompt: typeof a.quizPrompt === 'string' && a.quizPrompt.trim()
+          ? a.quizPrompt.trim()
+          : null,
+        accepted_answers: sanitizeAcceptedAnswers(a.acceptedAnswers),
+        difficulty: sanitizeDifficulty(a.difficulty),
       }))
 
       const { error: insertError } = await supabase.from('annotations').insert(rows)

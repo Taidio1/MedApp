@@ -1,7 +1,14 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Annotation } from '@/lib/types'
+import {
+  Annotation,
+  AnnotationDifficulty,
+  AnnotationPointLayer,
+  annotationDifficulties,
+  annotationPointLayers,
+} from '@/lib/types'
+import { annotationPointLayerLabels, toggleAnnotationPointLayer } from '@/lib/learning'
 const ANNOTATION_SIZE_MIN = 0.02
 const ANNOTATION_SIZE_MAX = 0.25
 const ANNOTATION_SIZE_DEFAULT = 0.08
@@ -14,6 +21,10 @@ interface AnnotationStoreRecord {
   position: [number, number, number]
   size?: number
   visible?: boolean
+  layerIds?: AnnotationPointLayer[]
+  quizPrompt?: string
+  acceptedAnswers?: string[]
+  difficulty?: AnnotationDifficulty
 }
 import {
   AdminAnnotationCanvas,
@@ -61,6 +72,10 @@ function annotationToStore(annotation: Annotation): AnnotationStoreRecord {
     position: annotation.position,
     size: annotation.size,
     visible: annotation.visible,
+    layerIds: annotation.layerIds,
+    quizPrompt: annotation.quizPrompt,
+    acceptedAnswers: annotation.acceptedAnswers,
+    difficulty: annotation.difficulty,
   }
 }
 
@@ -229,6 +244,9 @@ export function AdminAnnotationEditor() {
       position,
       size: ANNOTATION_SIZE_DEFAULT,
       visible: true,
+      layerIds: ['organ'],
+      acceptedAnswers: [],
+      difficulty: 'basic',
       structureId: selectedStructureId,
     }
 
@@ -529,6 +547,80 @@ export function AdminAnnotationEditor() {
                   rows={5}
                   className="w-full resize-none rounded border border-[#d8d0c3] bg-white px-3 py-2 text-sm leading-relaxed outline-none focus:border-[#7c3aed]"
                 />
+              </Field>
+
+              <Field label="Warstwy punktu">
+                <div className="grid grid-cols-2 gap-2">
+                  {annotationPointLayers.map((layerId) => {
+                    const active = (selectedAnnotation.layerIds ?? ['organ']).includes(layerId)
+                    return (
+                      <label
+                        key={layerId}
+                        className="flex items-center gap-2 rounded border border-[#d8d0c3] bg-white px-2 py-1.5 text-xs"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={active}
+                          onChange={() =>
+                            patchAnnotation(selectedAnnotation.id, {
+                              layerIds: toggleAnnotationPointLayer(
+                                selectedAnnotation.layerIds ?? ['organ'],
+                                layerId,
+                              ),
+                            })
+                          }
+                          className="h-3.5 w-3.5 accent-[#7c3aed]"
+                        />
+                        {annotationPointLayerLabels[layerId]}
+                      </label>
+                    )
+                  })}
+                </div>
+              </Field>
+
+              <Field label="Pytanie quizowe">
+                <input
+                  value={selectedAnnotation.quizPrompt ?? ''}
+                  onChange={(event) =>
+                    patchAnnotation(selectedAnnotation.id, {
+                      quizPrompt: event.target.value,
+                    })
+                  }
+                  className="w-full rounded border border-[#d8d0c3] bg-white px-3 py-2 text-sm outline-none focus:border-[#7c3aed]"
+                />
+              </Field>
+
+              <Field label="Akceptowane odpowiedzi">
+                <input
+                  value={(selectedAnnotation.acceptedAnswers ?? []).join(', ')}
+                  onChange={(event) =>
+                    patchAnnotation(selectedAnnotation.id, {
+                      acceptedAnswers: event.target.value
+                        .split(',')
+                        .map((answer) => answer.trim())
+                        .filter(Boolean),
+                    })
+                  }
+                  className="w-full rounded border border-[#d8d0c3] bg-white px-3 py-2 text-sm outline-none focus:border-[#7c3aed]"
+                />
+              </Field>
+
+              <Field label="Trudność">
+                <select
+                  value={selectedAnnotation.difficulty ?? 'basic'}
+                  onChange={(event) =>
+                    patchAnnotation(selectedAnnotation.id, {
+                      difficulty: event.target.value as AnnotationDifficulty,
+                    })
+                  }
+                  className="w-full rounded border border-[#d8d0c3] bg-white px-3 py-2 text-sm outline-none focus:border-[#7c3aed]"
+                >
+                  {annotationDifficulties.map((difficulty) => (
+                    <option key={difficulty} value={difficulty}>
+                      {difficulty}
+                    </option>
+                  ))}
+                </select>
               </Field>
 
               <div className="grid grid-cols-3 gap-2">
