@@ -1,6 +1,13 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useAppStore } from '@/lib/store'
+import { filterAnnotationsByLayers } from '@/lib/learning'
+import { AnnotationLayerFilter } from './AnnotationLayerFilter'
+import { LearningTabs } from './LearningTabs'
+import { AnnotationPointList } from './AnnotationPointList'
+import { StudyModePanel } from './StudyModePanel'
+import { QuizModePanel } from './QuizModePanel'
 
 function EmptyLearningPanel() {
   return (
@@ -10,7 +17,7 @@ function EmptyLearningPanel() {
           Mapa nauki
         </p>
         <p className="mt-2 text-xs leading-relaxed text-[#6b7280]">
-          Po wybraniu narządu pojawią się tutaj punkty orientacyjne i szybka powtórka.
+          Po wybraniu narządu pojawią się tutaj punkty orientacyjne, tryb nauki i quiz.
         </p>
       </div>
     </div>
@@ -38,10 +45,52 @@ function LearningMetric({
 
 export function PanelBottom() {
   const selectedStructure = useAppStore((state) => state.selectedStructure)
+  const structures = useAppStore((state) => state.structures)
   const activeAnnotation = useAppStore((state) => state.activeAnnotation)
   const setActiveAnnotation = useAppStore((state) => state.setActiveAnnotation)
-  const annotations = selectedStructure?.annotations ?? []
-  const visibleAnnotations = annotations.slice(0, 4)
+  const activeLearningTab = useAppStore((state) => state.activeLearningTab)
+  const setActiveLearningTab = useAppStore((state) => state.setActiveLearningTab)
+  const activeAnnotationPointLayers = useAppStore(
+    (state) => state.activeAnnotationPointLayers,
+  )
+  const toggleAnnotationPointLayer = useAppStore(
+    (state) => state.toggleAnnotationPointLayer,
+  )
+  const enableAllAnnotationPointLayers = useAppStore(
+    (state) => state.enableAllAnnotationPointLayers,
+  )
+  const studyIndex = useAppStore((state) => state.studyIndex)
+  const setStudyIndex = useAppStore((state) => state.setStudyIndex)
+  const rememberedAnnotationIds = useAppStore(
+    (state) => state.rememberedAnnotationIds,
+  )
+  const toggleRememberedAnnotation = useAppStore(
+    (state) => state.toggleRememberedAnnotation,
+  )
+  const quizQuestion = useAppStore((state) => state.quizQuestion)
+  const setQuizQuestion = useAppStore((state) => state.setQuizQuestion)
+  const selectedQuizAnswerId = useAppStore((state) => state.selectedQuizAnswerId)
+  const setSelectedQuizAnswerId = useAppStore(
+    (state) => state.setSelectedQuizAnswerId,
+  )
+  const quizScore = useAppStore((state) => state.quizScore)
+  const setQuizScore = useAppStore((state) => state.setQuizScore)
+
+  const annotations = useMemo(
+    () => selectedStructure?.annotations ?? [],
+    [selectedStructure?.annotations],
+  )
+  const filteredAnnotations = useMemo(
+    () => filterAnnotationsByLayers(annotations, activeAnnotationPointLayers),
+    [annotations, activeAnnotationPointLayers],
+  )
+  const fallbackAnnotations = useMemo(
+    () =>
+      Object.values(structures)
+        .flatMap((structure) => structure.annotations)
+        .filter((annotation) => annotation.structureId !== selectedStructure?.id),
+    [structures, selectedStructure?.id],
+  )
   const activeAnnotationInStructure =
     activeAnnotation?.structureId === selectedStructure?.id ? activeAnnotation : null
 
@@ -53,63 +102,63 @@ export function PanelBottom() {
         <>
           <div className="flex min-w-0 flex-1 flex-col px-5 py-3">
             <div className="mb-2 flex items-center justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-[#9ca3af]">
-                  Punkty orientacyjne
+                  Mapa nauki
                 </p>
-                <p className="mt-0.5 text-[11px] text-[#6b7280]">
+                <p className="mt-0.5 truncate text-[11px] text-[#6b7280]">
                   {selectedStructure.namePL} · {selectedStructure.nameLAT}
                 </p>
               </div>
-              <span className="rounded-full bg-[#ede9fe] px-2.5 py-1 text-[10px] font-semibold text-[#6d28d9]">
-                {annotations.length} anotacje
-              </span>
+              <div className="flex items-center gap-2">
+                <LearningTabs
+                  activeTab={activeLearningTab}
+                  onChange={setActiveLearningTab}
+                />
+                <span className="rounded-full bg-[#ede9fe] px-2.5 py-1 text-[10px] font-semibold text-[#6d28d9]">
+                  {filteredAnnotations.length}/{annotations.length} punkty
+                </span>
+              </div>
             </div>
 
-            {visibleAnnotations.length > 0 ? (
-              <div className="grid min-h-0 flex-1 grid-cols-4 gap-2">
-                {visibleAnnotations.map((annotation, index) => {
-                  const isActive = activeAnnotationInStructure?.id === annotation.id
+            <div className="mb-2">
+              <AnnotationLayerFilter
+                activeLayers={activeAnnotationPointLayers}
+                onToggleLayer={toggleAnnotationPointLayer}
+                onEnableAll={enableAllAnnotationPointLayers}
+              />
+            </div>
 
-                  return (
-                    <button
-                      key={annotation.id}
-                      type="button"
-                      aria-pressed={isActive}
-                      onClick={() => setActiveAnnotation(annotation)}
-                      className={[
-                        'group min-w-0 rounded-md border px-3 py-2 text-left shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-200',
-                        'hover:-translate-y-0.5 hover:border-[#7c3aed]/45 hover:shadow-[0_8px_22px_rgba(124,58,237,0.14)]',
-                        'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7c3aed]',
-                        isActive
-                          ? 'border-[#7c3aed] bg-[#f4f0ff] shadow-[0_10px_28px_rgba(124,58,237,0.18)]'
-                          : 'border-[#e5e7eb] bg-white',
-                      ].join(' ')}
-                    >
-                      <div className="mb-1 flex items-center gap-2">
-                        <span
-                          className={[
-                            'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white transition-transform duration-200',
-                            isActive ? 'scale-110 bg-[#f59e0b]' : 'bg-[#7c3aed] group-hover:scale-105',
-                          ].join(' ')}
-                        >
-                          {index + 1}
-                        </span>
-                        <span className="truncate text-xs font-semibold text-[#111827]">
-                          {annotation.label}
-                        </span>
-                      </div>
-                      <p className="truncate text-[10px] italic text-[#7c3aed]">
-                        {annotation.nameLAT ?? 'Nazwa łacińska w opracowaniu'}
-                      </p>
-                    </button>
-                  )
-                })}
-              </div>
-            ) : (
-              <div className="flex flex-1 items-center rounded-md border border-dashed border-[#d1d5db] px-4 text-xs text-[#9ca3af]">
-                Ten model nie ma jeszcze oznaczonych punktów nauki.
-              </div>
+            {activeLearningTab === 'points' && (
+              <AnnotationPointList
+                annotations={filteredAnnotations}
+                activeAnnotation={activeAnnotationInStructure}
+                onSelectAnnotation={setActiveAnnotation}
+              />
+            )}
+            {activeLearningTab === 'study' && (
+              <StudyModePanel
+                annotations={filteredAnnotations}
+                activeAnnotation={activeAnnotationInStructure}
+                studyIndex={studyIndex}
+                rememberedAnnotationIds={rememberedAnnotationIds}
+                onSetStudyIndex={setStudyIndex}
+                onSelectAnnotation={setActiveAnnotation}
+                onToggleRemembered={toggleRememberedAnnotation}
+              />
+            )}
+            {activeLearningTab === 'quiz' && (
+              <QuizModePanel
+                annotations={filteredAnnotations}
+                fallbackAnnotations={fallbackAnnotations}
+                question={quizQuestion}
+                selectedAnswerId={selectedQuizAnswerId}
+                score={quizScore}
+                onSetQuestion={setQuizQuestion}
+                onSetSelectedAnswer={setSelectedQuizAnswerId}
+                onSetScore={setQuizScore}
+                onSelectAnnotation={setActiveAnnotation}
+              />
             )}
           </div>
 
@@ -119,11 +168,11 @@ export function PanelBottom() {
             </p>
             <div className="grid grid-cols-2 gap-2">
               <LearningMetric label="Układ" value={selectedStructure.system} />
-              <LearningMetric label="Model" value=".glb" />
+              <LearningMetric label="Tryb" value={activeLearningTab} />
             </div>
             <p className="line-clamp-2 text-[11px] leading-relaxed text-[#6b7280]">
               {activeAnnotationInStructure?.description ??
-                annotations[0]?.description ??
+                filteredAnnotations[0]?.description ??
                 selectedStructure.description}
             </p>
           </div>
