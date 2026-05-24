@@ -7,7 +7,6 @@ export const baseAnatomyTree: AnatomyNode[] = [
     icon: '♥',
     children: [
       { id: 'serce', label: 'Serce', structureId: 'serce' },
-      { id: 'naczynia', label: 'Naczynia krwionośne', structureId: 'naczynia' },
     ],
   },
   {
