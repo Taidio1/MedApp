@@ -70,10 +70,10 @@ export function AppShell({ email, displayName, isAdmin }: AppShellProps) {
             <span aria-hidden="true">▦</span>
             <small>Explorer</small>
           </a>
-          <a href="#learning" aria-label="Nauka">
+          <Link href="/nauka" aria-label="Nauka">
             <span aria-hidden="true">☰</span>
             <small>Nauka</small>
-          </a>
+          </Link>
           <Link href="/quiz" aria-label="Quiz">
             <span aria-hidden="true">◎</span>
             <small>Quiz</small>
