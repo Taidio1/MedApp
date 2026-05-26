@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
-import { NAUKA_CARDS, READING_MATERIALS, type NaukaCard } from '@/lib/naukaData'
+import type { NaukaCard, ReadingMaterial } from '@/lib/naukaData'
+import type { UserNaukaStats } from '@/lib/supabase/nauka'
 import { NaukaLeftPanel } from './NaukaLeftPanel'
 import { NaukaRightPanel } from './NaukaRightPanel'
 import { NaukaHome } from './NaukaHome'
@@ -18,27 +19,69 @@ interface NaukaPageProps {
 type NaukaScreen  = 'tablica' | 'sesja' | 'czytaj'
 type SessionPhase = 'running' | 'done'
 
-const POMODORO = 25 * 60
+const POMODORO        = 25 * 60
+const NOTE_DEBOUNCE   = 1500
+
+const NK = '#2a7a60'
 
 export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
-  const [screen, setScreen]           = useState<NaukaScreen>('tablica')
+  const [screen, setScreen]             = useState<NaukaScreen>('tablica')
   const [sessionCards, setSessionCards] = useState<NaukaCard[]>([])
-  const [cardIdx, setCardIdx]         = useState(0)
-  const [flipped, setFlipped]         = useState(false)
-  const [results, setResults]         = useState<Record<string, boolean>>({})
-  const [phase, setPhase]             = useState<SessionPhase>('running')
-  const [timeLeft, setTimeLeft]       = useState<number | null>(null)
-  const [isPaused, setIsPaused]       = useState(false)
-  const [notes, setNotes]             = useState<Record<string, string>>({})
-  const [config, setConfig]           = useState({ sys: 'Wszystkie układy', mode: 'nolimit' as 'nolimit' | 'pomodoro' })
-  const [readSysKey, setReadSysKey]   = useState('Układ Krążenia')
-  const [readSection, setReadSection] = useState(0)
+  const [cardIdx, setCardIdx]           = useState(0)
+  const [flipped, setFlipped]           = useState(false)
+  const [results, setResults]           = useState<Record<string, boolean>>({})
+  const [phase, setPhase]               = useState<SessionPhase>('running')
+  const [timeLeft, setTimeLeft]         = useState<number | null>(null)
+  const [isPaused, setIsPaused]         = useState(false)
+  const [notes, setNotes]               = useState<Record<string, string>>({})
+  const [config, setConfig]             = useState({ sys: 'Wszystkie układy', mode: 'nolimit' as 'nolimit' | 'pomodoro' })
+  const [readSysKey, setReadSysKey]     = useState('Układ Krążenia')
+  const [readSection, setReadSection]   = useState(0)
+
+  // Remote data
+  const [cards, setCards]       = useState<NaukaCard[]>([])
+  const [readings, setReadings] = useState<ReadingMaterial[]>([])
+  const [progress, setProgress] = useState<Record<string, { done: number; total: number }>>({})
+  const [stats, setStats]       = useState<UserNaukaStats | null>(null)
+  const [loading, setLoading]   = useState(true)
+
+  // Session tracking
+  const sessionStartedAt = useRef<string | null>(null)
+  const sessionSaved     = useRef(false)
+  const noteTimers       = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+
+  useEffect(() => {
+    const timers = noteTimers.current
+    return () => { Object.values(timers).forEach(clearTimeout) }
+  }, [])
+
+  // Initial data load
+  useEffect(() => {
+    async function load() {
+      try {
+        const [cardsRes, readingsRes, progressRes, statsRes, notesRes] = await Promise.all([
+          fetch('/api/nauka/cards').then(r => r.json()),
+          fetch('/api/nauka/readings').then(r => r.json()),
+          fetch('/api/nauka/progress').then(r => r.json()),
+          fetch('/api/nauka/stats').then(r => r.json()),
+          fetch('/api/nauka/notes').then(r => r.json()),
+        ])
+        if (Array.isArray(cardsRes))   setCards(cardsRes)
+        if (Array.isArray(readingsRes)) setReadings(readingsRes)
+        if (progressRes && !progressRes.error) setProgress(progressRes)
+        if (statsRes    && !statsRes.error)    setStats(statsRes)
+        if (notesRes    && !notesRes.error)    setNotes(notesRes)
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
 
   // Pomodoro timer
   useEffect(() => {
     if (screen !== 'sesja' || phase !== 'running' || config.mode !== 'pomodoro' || isPaused || timeLeft === null) return
     if (timeLeft <= 0) { setPhase('done'); return }
-
     const iv = setInterval(() => {
       setTimeLeft(t => {
         if (t === null || t <= 1) { clearInterval(iv); return 0 }
@@ -52,11 +95,37 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
     if (timeLeft === 0 && phase === 'running') setPhase('done')
   }, [timeLeft]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Save session + refresh stats when done
+  useEffect(() => {
+    if (phase !== 'done' || sessionSaved.current || !sessionStartedAt.current || sessionCards.length === 0) return
+    sessionSaved.current = true
+
+    const knownCount = Object.values(results).filter(Boolean).length
+    fetch('/api/nauka/sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode:       config.mode,
+        system:     config.sys,
+        cardsTotal: sessionCards.length,
+        cardsKnown: knownCount,
+        startedAt:  sessionStartedAt.current,
+        results,
+      }),
+    }).then(() =>
+      Promise.all([
+        fetch('/api/nauka/progress').then(r => r.json()),
+        fetch('/api/nauka/stats').then(r => r.json()),
+      ]).then(([progressRes, statsRes]) => {
+        if (progressRes && !progressRes.error) setProgress(progressRes)
+        if (statsRes    && !statsRes.error)    setStats(statsRes)
+      }),
+    )
+  }, [phase]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const startSession = useCallback(() => {
-    const filtered = config.sys === 'Wszystkie układy'
-      ? NAUKA_CARDS
-      : NAUKA_CARDS.filter(c => c.system === config.sys)
-    const shuffled = [...filtered].sort(() => Math.random() - 0.5)
+    const pool     = config.sys === 'Wszystkie układy' ? cards : cards.filter(c => c.system === config.sys)
+    const shuffled = [...pool].sort(() => Math.random() - 0.5)
     setSessionCards(shuffled)
     setCardIdx(0)
     setFlipped(false)
@@ -65,7 +134,9 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
     setTimeLeft(config.mode === 'pomodoro' ? POMODORO : null)
     setIsPaused(false)
     setScreen('sesja')
-  }, [config])
+    sessionStartedAt.current = new Date().toISOString()
+    sessionSaved.current     = false
+  }, [config, cards])
 
   const handleAnswer = (knew: boolean) => {
     const card = sessionCards[cardIdx]
@@ -92,13 +163,44 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
     setScreen('czytaj')
   }
 
-  const readingMaterial = READING_MATERIALS.find(m => m.sys === readSysKey) ?? null
+  const handleNoteChange = (cardId: string, text: string) => {
+    setNotes(prev => ({ ...prev, [cardId]: text }))
+    if (noteTimers.current[cardId]) clearTimeout(noteTimers.current[cardId])
+    noteTimers.current[cardId] = setTimeout(() => {
+      fetch('/api/nauka/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardId, content: text }),
+      })
+    }, NOTE_DEBOUNCE)
+  }
+
+  const readingMaterial = readings.find(m => m.sys === readSysKey) ?? null
   const currentCard     = screen === 'sesja' && phase === 'running' ? (sessionCards[cardIdx] ?? null) : null
 
   const shellStyle: CSSProperties = {
-    '--qz-accent':      '#2a7a60',
+    '--qz-accent':      NK,
     '--qz-accent-soft': '#d2ede6',
   } as CSSProperties
+
+  if (loading) {
+    return (
+      <div className="quiz-shell" style={shellStyle}>
+        <header className="quiz-header">
+          <div className="quiz-brand">
+            <div className="quiz-brand-orb" style={{ borderColor: 'rgba(42,122,96,0.3)' }}>✦</div>
+            <div className="quiz-brand-text">
+              <h1>MedApp Anatomy Studio</h1>
+              <p>Interaktywny atlas anatomii 3D</p>
+            </div>
+          </div>
+        </header>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+          <span style={{ fontSize: 14, color: '#80786d', fontFamily: 'Inter,sans-serif' }}>Ładowanie…</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="quiz-shell" style={shellStyle}>
@@ -135,11 +237,12 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
 
       {/* 3-column body */}
       <div className="quiz-body">
-        {/* Left panel */}
         <aside className="quiz-panel-left">
           <NaukaLeftPanel
             screen={screen}
             configSys={config.sys}
+            progress={progress}
+            stats={stats}
             onScreenChange={s => {
               setScreen(s)
               if (s === 'sesja' && sessionCards.length === 0) startSession()
@@ -148,13 +251,14 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
           />
         </aside>
 
-        {/* Center */}
         <main className="quiz-center">
           <div className="quiz-center-inner">
             {screen === 'tablica' && (
               <NaukaHome
                 configSys={config.sys}
                 configMode={config.mode}
+                progress={progress}
+                stats={stats}
                 onConfigSysChange={sys => setConfig(prev => ({ ...prev, sys }))}
                 onConfigModeChange={mode => setConfig(prev => ({ ...prev, mode }))}
                 onStart={startSession}
@@ -188,14 +292,14 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
           </div>
         </main>
 
-        {/* Right panel */}
         <aside className="quiz-panel-right">
           <NaukaRightPanel
             screen={screen}
             phase={phase}
             currentCard={currentCard}
             notes={notes}
-            onNoteChange={(cardId, text) => setNotes(prev => ({ ...prev, [cardId]: text }))}
+            stats={stats}
+            onNoteChange={handleNoteChange}
           />
         </aside>
       </div>

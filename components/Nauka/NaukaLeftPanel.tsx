@@ -1,31 +1,31 @@
 'use client'
 
-import { NAUKA_SYSTEMS, SYSTEM_PROGRESS } from '@/lib/naukaData'
+import { NAUKA_SYSTEMS } from '@/lib/naukaData'
+import type { UserNaukaStats } from '@/lib/supabase/nauka'
 
 type NaukaScreen = 'tablica' | 'sesja' | 'czytaj'
 
 interface NaukaLeftPanelProps {
   screen: NaukaScreen
   configSys: string
+  progress: Record<string, { done: number; total: number }>
+  stats: UserNaukaStats | null
   onScreenChange: (s: NaukaScreen) => void
   onSysSelect: (sys: string) => void
 }
 
-const NK = '#2a7a60'
+const NK      = '#2a7a60'
 const NK_SOFT = '#d2ede6'
 
 const navItems = [
-  { id: 'tablica' as NaukaScreen, label: 'Tablica', icon: '⊞' },
-  { id: 'sesja'   as NaukaScreen, label: 'Sesja nauki', icon: '▶' },
-  { id: 'czytaj'  as NaukaScreen, label: 'Czytaj', icon: '📖' },
+  { id: 'tablica' as NaukaScreen, label: 'Tablica',      icon: '⊞' },
+  { id: 'sesja'   as NaukaScreen, label: 'Sesja nauki',  icon: '▶' },
+  { id: 'czytaj'  as NaukaScreen, label: 'Czytaj',       icon: '📖' },
 ]
 
-const totalDone  = Object.values(SYSTEM_PROGRESS).reduce((a, v) => a + v.done,  0)
-const totalCards = Object.values(SYSTEM_PROGRESS).reduce((a, v) => a + v.total, 0)
-
-export function NaukaLeftPanel({ screen, configSys, onScreenChange, onSysSelect }: NaukaLeftPanelProps) {
-  const sysColor = (name: string) =>
-    NAUKA_SYSTEMS.find(s => s.name === name)?.color ?? NK
+export function NaukaLeftPanel({ screen, configSys, progress, stats, onScreenChange, onSysSelect }: NaukaLeftPanelProps) {
+  const totalDone  = Object.values(progress).reduce((a, v) => a + v.done,  0)
+  const totalCards = Object.values(progress).reduce((a, v) => a + v.total, 0)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
@@ -78,14 +78,14 @@ export function NaukaLeftPanel({ screen, configSys, onScreenChange, onSysSelect 
             <span style={{ fontSize: 11, color: '#80786d', fontFamily: 'Inter,sans-serif' }}>{totalDone}/{totalCards}</span>
           </div>
           <div style={{ height: 4, borderRadius: 99, background: 'rgba(91,78,60,0.12)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', borderRadius: 99, background: NK, width: `${Math.round(totalDone / totalCards * 100)}%`, transition: 'width 0.4s ease' }} />
+            <div style={{ height: '100%', borderRadius: 99, background: NK, width: `${totalCards > 0 ? Math.round(totalDone / totalCards * 100) : 0}%`, transition: 'width 0.4s ease' }} />
           </div>
         </button>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
           {NAUKA_SYSTEMS.slice(1).map(sys => {
-            const prog = SYSTEM_PROGRESS[sys.name]
-            const pct  = prog ? Math.round(prog.done / prog.total * 100) : 0
+            const prog   = progress[sys.name]
+            const pct    = prog && prog.total > 0 ? Math.round(prog.done / prog.total * 100) : 0
             const active = configSys === sys.name
             return (
               <button key={sys.name} onClick={() => onSysSelect(sys.name)}
@@ -118,9 +118,9 @@ export function NaukaLeftPanel({ screen, configSys, onScreenChange, onSysSelect 
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
           {[
-            { label: 'Kart do powtórki', value: '8', color: '#bd514d' },
-            { label: 'Nowych kart',      value: '5', color: NK },
-            { label: 'Czas nauki',       value: '~12 min', color: '#80786d' },
+            { label: 'Kart do powtórki', value: stats?.cardsToReview.toString()  ?? '—',                        color: '#bd514d' },
+            { label: 'Nowych kart',      value: stats?.newCardsToday.toString()   ?? '—',                        color: NK },
+            { label: 'Czas nauki',       value: stats ? `~${stats.estimatedMinutes} min` : '—',                  color: '#80786d' },
           ].map(row => (
             <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 11, color: '#80786d', fontFamily: 'Inter,sans-serif' }}>{row.label}</span>

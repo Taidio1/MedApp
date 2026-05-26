@@ -1,24 +1,27 @@
 'use client'
 
-import { NAUKA_SYSTEMS, SYSTEM_PROGRESS } from '@/lib/naukaData'
+import { NAUKA_SYSTEMS } from '@/lib/naukaData'
+import type { UserNaukaStats } from '@/lib/supabase/nauka'
 
 interface NaukaHomeProps {
   configSys: string
   configMode: 'nolimit' | 'pomodoro'
+  progress: Record<string, { done: number; total: number }>
+  stats: UserNaukaStats | null
   onConfigSysChange: (sys: string) => void
   onConfigModeChange: (mode: 'nolimit' | 'pomodoro') => void
   onStart: () => void
   onRead: () => void
 }
 
-const NK = '#2a7a60'
+const NK      = '#2a7a60'
 const NK_SOFT = '#d2ede6'
 
-const totalDone  = Object.values(SYSTEM_PROGRESS).reduce((a, v) => a + v.done,  0)
-const totalCards = Object.values(SYSTEM_PROGRESS).reduce((a, v) => a + v.total, 0)
-const overallPct = Math.round(totalDone / totalCards * 100)
+export function NaukaHome({ configSys, configMode, progress, stats, onConfigSysChange, onConfigModeChange, onStart, onRead }: NaukaHomeProps) {
+  const totalDone  = Object.values(progress).reduce((a, v) => a + v.done,  0)
+  const totalCards = Object.values(progress).reduce((a, v) => a + v.total, 0)
+  const overallPct = totalCards > 0 ? Math.round(totalDone / totalCards * 100) : 0
 
-export function NaukaHome({ configSys, configMode, onConfigSysChange, onConfigModeChange, onStart, onRead }: NaukaHomeProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'nk-rise-in 0.3s ease both' }}>
 
@@ -30,7 +33,6 @@ export function NaukaHome({ configSys, configMode, onConfigSysChange, onConfigMo
         boxShadow: '0 8px 26px rgba(42,122,96,0.10)',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Decorative orb */}
         <div style={{
           position: 'absolute', right: -30, top: -30,
           width: 160, height: 160, borderRadius: '50%',
@@ -73,9 +75,9 @@ export function NaukaHome({ configSys, configMode, onConfigSysChange, onConfigMo
         {/* Stat chips */}
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           {[
-            { label: `${totalDone} opanowanych`, bg: NK_SOFT, color: NK },
-            { label: `${totalCards - totalDone} do powtórki`, bg: '#fef3cd', color: '#92680a' },
-            { label: '8 nowych dziś', bg: '#e6f4ff', color: '#1a6aad' },
+            { label: `${totalDone} opanowanych`,                              bg: NK_SOFT,    color: NK },
+            { label: `${totalCards - totalDone} do powtórki`,                 bg: '#fef3cd',  color: '#92680a' },
+            { label: `${stats?.newCardsToday ?? 0} nowych dziś`,              bg: '#e6f4ff',  color: '#1a6aad' },
           ].map(chip => (
             <span key={chip.label} style={{
               display: 'inline-flex', alignItems: 'center',
@@ -138,7 +140,7 @@ export function NaukaHome({ configSys, configMode, onConfigSysChange, onConfigMo
           </label>
           <div style={{ display: 'flex', gap: 8 }}>
             {[
-              { value: 'nolimit' as const,  label: '∞ Bez limitu' },
+              { value: 'nolimit'  as const, label: '∞ Bez limitu' },
               { value: 'pomodoro' as const, label: '🍅 Pomodoro (25 min)' },
             ].map(opt => (
               <button key={opt.value} onClick={() => onConfigModeChange(opt.value)}

@@ -1,8 +1,9 @@
 'use client'
 
-import { NaukaCard } from '@/lib/naukaData'
+import type { NaukaCard } from '@/lib/naukaData'
+import type { UserNaukaStats } from '@/lib/supabase/nauka'
 
-type NaukaScreen = 'tablica' | 'sesja' | 'czytaj'
+type NaukaScreen  = 'tablica' | 'sesja' | 'czytaj'
 type SessionPhase = 'running' | 'done'
 
 interface NaukaRightPanelProps {
@@ -10,16 +11,17 @@ interface NaukaRightPanelProps {
   phase: SessionPhase
   currentCard: NaukaCard | null
   notes: Record<string, string>
+  stats: UserNaukaStats | null
   onNoteChange: (cardId: string, text: string) => void
 }
 
-const NK = '#2a7a60'
+const NK      = '#2a7a60'
 const NK_SOFT = '#d2ede6'
 
 const DIFF_LABELS: Record<string, { label: string; color: string }> = {
-  basic:        { label: 'Podstawowy',    color: '#4caf50' },
-  intermediate: { label: 'Średni',        color: '#f59e0b' },
-  advanced:     { label: 'Zaawansowany',  color: '#e53935' },
+  basic:        { label: 'Podstawowy',   color: '#4caf50' },
+  intermediate: { label: 'Średni',       color: '#f59e0b' },
+  advanced:     { label: 'Zaawansowany', color: '#e53935' },
 }
 
 const SYS_COLORS: Record<string, string> = {
@@ -28,6 +30,13 @@ const SYS_COLORS: Record<string, string> = {
   'Układ Pokarmowy': '#9b74b7',
   'OUN':             '#6578b5',
   'Układ Moczowy':   '#48a77d',
+}
+
+function formatMinutes(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return m === 0 ? `${h}h` : `${h}h ${m}m`
 }
 
 function SectionLabel({ children }: { children: string }) {
@@ -46,7 +55,7 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
   )
 }
 
-export function NaukaRightPanel({ screen, phase, currentCard, notes, onNoteChange }: NaukaRightPanelProps) {
+export function NaukaRightPanel({ screen, phase, currentCard, notes, stats, onNoteChange }: NaukaRightPanelProps) {
   const inSession = screen === 'sesja' && phase === 'running' && currentCard !== null
 
   return (
@@ -129,10 +138,10 @@ export function NaukaRightPanel({ screen, phase, currentCard, notes, onNoteChang
             <SectionLabel>Statystyki</SectionLabel>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
-                { label: 'Łączne karty',     value: '75',   icon: '◉' },
-                { label: 'Opanowane',        value: '33',   icon: '✓' },
-                { label: 'Sesje w tym tyg.', value: '5',    icon: '▶' },
-                { label: 'Czas nauki',       value: '2h 18m', icon: '⏱' },
+                { label: 'Łączne karty',     value: stats?.totalCards.toString()              ?? '—', icon: '◉' },
+                { label: 'Opanowane',        value: stats?.knownCards.toString()              ?? '—', icon: '✓' },
+                { label: 'Sesje w tym tyg.', value: stats?.sessionsThisWeek.toString()        ?? '—', icon: '▶' },
+                { label: 'Czas nauki',       value: stats ? formatMinutes(stats.totalStudyMinutes) : '—', icon: '⏱' },
               ].map(row => (
                 <div key={row.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(91,78,60,0.08)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
