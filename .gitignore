@@ -43,6 +43,6 @@ next-env.d.ts
 # AI-generated files and folders
 .claude/
 .superpowers/
-docs/superpowers/
+docs/
 PROJEKT_ANATOMIA_BRAINSTORM.md
 UI-Design.md
