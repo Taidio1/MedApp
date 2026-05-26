@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
+import { AppNavbar } from '@/components/AppNavbar/AppNavbar'
 import { PanelBottom } from '@/components/PanelBottom/PanelBottom'
 import { PanelLeft } from '@/components/PanelLeft/PanelLeft'
 import { PanelRight } from '@/components/PanelRight/PanelRight'
@@ -54,33 +55,7 @@ export function AppShell({ email, displayName, isAdmin }: AppShellProps) {
 
   return (
     <div className="medapp-shell" style={shellStyle}>
-      <header className="topbar">
-        <div className="brand-block">
-          <div className="brand-orb" aria-hidden="true">
-            <span>✧</span>
-          </div>
-          <div className="min-w-0">
-            <h1>MedApp Anatomy Studio</h1>
-            <p>Interaktywny atlas anatomii 3D</p>
-          </div>
-        </div>
-
-        <nav className="top-nav" aria-label="Główna nawigacja">
-          <a href="#explorer" aria-label="Explorer">
-            <span aria-hidden="true">▦</span>
-            <small>Explorer</small>
-          </a>
-          <Link href="/nauka" aria-label="Nauka">
-            <span aria-hidden="true">☰</span>
-            <small>Nauka</small>
-          </Link>
-          <Link href="/quiz" aria-label="Quiz">
-            <span aria-hidden="true">◎</span>
-            <small>Quiz</small>
-          </Link>
-          <UserMenu email={email} displayName={displayName} isAdmin={isAdmin} />
-        </nav>
-      </header>
+      <AppNavbar active="atlas" email={email} displayName={displayName} isAdmin={isAdmin} />
 
       <div className="medapp-grid" id="explorer">
         <PanelLeft />
