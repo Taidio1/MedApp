@@ -62,7 +62,8 @@ export function PanelBottom() {
   const fallbackAnnotations = useMemo(
     () =>
       Object.values(structures)
-        .flatMap((structure) => structure.annotations)
+        .flatMap((structure) => structure.annotations ?? [])
+        .filter((annotation) => annotation != null)
         .filter((annotation) => annotation.structureId !== selectedStructure?.id),
     [structures, selectedStructure?.id],
   )

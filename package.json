@@ -8,6 +8,7 @@
     "verify:learning-data": "node scripts/verify-learning-data.mjs",
     "verify:learning-ui": "node scripts/verify-learning-ui.mjs",
     "verify:structures-api": "node scripts/verify-structures-api.mjs",
+    "verify:structure-normalization": "node scripts/verify-structure-normalization.mjs",
     "verify:annotation-panel": "node scripts/verify-stable-annotation-panel.mjs",
     "verify:admin-annotations": "node scripts/verify-admin-annotations.mjs",
     "verify:auth-admin": "node scripts/verify-auth-admin.mjs",

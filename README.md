@@ -67,8 +67,22 @@ docker compose up --build
 # Aplikacja dostępna pod http://localhost:8080
 #
 # Jeśli chcesz wystawić ją na innych portach:
-# HTTP_PORT=80 HTTPS_PORT=443 docker compose up --build
+# HTTP_PORT=8081 HTTPS_PORT=8444 docker compose up --build
 ```
+
+### Troubleshooting Docker Compose
+
+Używaj nowszego polecenia `docker compose`, a nie starego `docker-compose`.
+Legacy `docker-compose` 1.29.2 może kończyć się błędem `KeyError: 'ContainerConfig'`
+przy nowszych wersjach Docker Engine.
+
+```bash
+docker compose version
+docker compose down --remove-orphans
+docker compose up -d --build --force-recreate
+```
+
+Jeśli `docker compose version` nie działa, doinstaluj plugin Compose v2 na serwerze.
 
 ---
 

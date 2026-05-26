@@ -12,6 +12,7 @@ import {
   defaultAnnotationPointLayers,
   toggleAnnotationPointLayer,
 } from './learning'
+import { normalizeStructuresPayload } from './structureNormalization'
 
 interface AppState {
   selectedStructure: AnatomicalStructure | null
@@ -178,8 +179,11 @@ export const useAppStore = create<AppState>((set) => ({
     try {
       const response = await fetch('/api/structures')
       if (!response.ok) throw new Error('Nie udało się pobrać struktur')
-      const data: Record<string, AnatomicalStructure> = await response.json()
-      set({ structures: data, structuresLoading: false })
+      const data: unknown = await response.json()
+      set({
+        structures: normalizeStructuresPayload(data),
+        structuresLoading: false,
+      })
     } catch {
       set({ structuresLoading: false })
     }
