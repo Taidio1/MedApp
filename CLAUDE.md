@@ -47,7 +47,7 @@ docker compose up --build
 - `LayerPanel.tsx` — per-layer visibility toggles (only shown when `selectedStructure.layers` exists)
 - `Annotations.tsx` — clickable 3D annotation points from `AnatomicalStructure.annotations`
 
-**AI chat** — `app/api/ask/route.ts` is a Next.js Route Handler that proxies `POST /ask { structure, question }` to the FastAPI backend (timeout 30s). Backend URL: `NEXT_PUBLIC_API_URL` env var, defaults to `http://localhost:8000`.
+**AI chat** — `app/api/ask/route.ts` is a Next.js Route Handler that proxies `POST /ask { structure, question }` to the FastAPI backend (timeout 30s). Backend URL: `BACKEND_API_URL` env var, then `NEXT_PUBLIC_API_URL`, defaults to `http://localhost:8000`.
 
 ### Backend
 
@@ -75,7 +75,8 @@ CORS is configured for `http://localhost:3000` and `http://web:3000` (Docker ser
 | Variable | Required | Purpose |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Yes | Claude API (backend RAG) |
-| `NEXT_PUBLIC_API_URL` | No | Backend URL (default: `http://localhost:8000`) |
+| `BACKEND_API_URL` | No | Internal FastAPI URL for Next.js route handlers; Docker sets `http://api:8000`, local default is `http://localhost:8000` |
+| `NEXT_PUBLIC_API_URL` | No | Legacy/local backend URL override when `BACKEND_API_URL` is not set |
 | `NEXT_PUBLIC_SUPABASE_URL` | No | Supabase project URL (enables RAG) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | No | Supabase public key (frontend, if needed) |
 | `SUPABASE_SERVICE_ROLE_KEY` | No | Supabase service key (backend vector search) |

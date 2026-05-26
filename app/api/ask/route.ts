@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
 
   // URL backendu z zmiennej środowiskowej
   const apiUrl =
+    process.env.BACKEND_API_URL ||
     process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
   try {

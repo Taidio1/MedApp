@@ -170,7 +170,8 @@ MedApp/
 | Zmienna | Wymagana | Opis |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | ✅ Tak | Klucz do Claude API |
-| `NEXT_PUBLIC_API_URL` | Nie | URL backendu (domyślnie: `http://localhost:8000`) |
+| `BACKEND_API_URL` | Nie | Wewnetrzny URL FastAPI dla Next.js route handlerow; Docker ustawia `http://api:8000`, lokalnie domyslnie `http://localhost:8000` |
+| `NEXT_PUBLIC_API_URL` | Nie | Legacy/lokalny override URL backendu, gdy `BACKEND_API_URL` nie jest ustawione |
 | `NEXT_PUBLIC_SUPABASE_URL` | Nie | URL projektu Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Nie | Klucz publiczny Supabase |
 | `SUPABASE_SERVICE_ROLE_KEY` | Nie | Klucz serwisowy Supabase (backend) |

@@ -8,6 +8,7 @@ services:
     env_file: .env
     environment:
       - NODE_ENV=production
+      - BACKEND_API_URL=http://api:8000
     networks:
       - app-network
 
