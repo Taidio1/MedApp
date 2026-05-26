@@ -1,0 +1,13 @@
+import { requireUser } from '@/lib/auth/guards'
+import { fetchQuizQuestions, mapDbQuestionToUi } from '@/lib/supabase/quiz'
+
+export async function GET() {
+  await requireUser()
+  try {
+    const dbQuestions = await fetchQuizQuestions()
+    return Response.json(dbQuestions.map(mapDbQuestionToUi))
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Nie udało się pobrać pytań'
+    return Response.json({ error: message }, { status: 500 })
+  }
+}
