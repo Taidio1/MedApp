@@ -66,7 +66,15 @@
       "Bash(node -e ':*)",
       "Bash(npm list:*)",
       "Bash(node:*)",
-      "Bash(npx:*)"
+      "Bash(npx:*)",
+      "PowerShell(Get-ChildItem \"E:\\\\MedApp\" -Depth 2 | Where-Object { !$_.PSIsContainer } | Select-Object FullName)",
+      "Skill(superpowers:brainstorming)",
+      "Bash(bash *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Skill(superpowers:writing-plans)",
+      "Skill(superpowers:subagent-driven-development)",
+      "Skill(superpowers:finishing-a-development-branch)"
     ]
   }
 }

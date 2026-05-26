@@ -1,0 +1,94 @@
+<h2>Jak powinny wyglądać dymki z opisami?</h2>
+<p class="subtitle">Wybierz styl, który pasuje do Twojej aplikacji medycznej</p>
+
+<div class="cards">
+
+  <!-- Opcja A: Stały dymek zawsze widoczny -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f0f1e;padding:20px;min-height:220px;display:flex;align-items:center;justify-content:center;position:relative;">
+      <!-- Simulated 3D model blob -->
+      <div style="width:100px;height:100px;background:radial-gradient(circle at 40% 35%,#a78bfa,#4c1d95);border-radius:50%;opacity:0.9;position:relative;">
+        <!-- Annotation dot -->
+        <div style="position:absolute;top:18px;right:-8px;width:10px;height:10px;background:#fbbf24;border-radius:50%;box-shadow:0 0 8px #fbbf24;"></div>
+        <!-- Speech bubble always visible -->
+        <div style="position:absolute;top:-2px;right:-130px;background:rgba(255,255,255,0.95);color:#111;font-size:11px;padding:6px 10px;border-radius:8px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.4);border:1px solid rgba(124,58,237,0.3);">
+          Płat czołowy
+          <div style="position:absolute;left:-6px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:6px solid rgba(255,255,255,0.95);"></div>
+        </div>
+      </div>
+      <!-- Second annotation -->
+      <div style="position:absolute;bottom:40px;left:60px;">
+        <div style="width:8px;height:8px;background:#fbbf24;border-radius:50%;box-shadow:0 0 6px #fbbf24;margin-bottom:4px;"></div>
+        <div style="background:rgba(255,255,255,0.95);color:#111;font-size:11px;padding:6px 10px;border-radius:8px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.4);border:1px solid rgba(124,58,237,0.3);">
+          Móżdżek
+          <div style="position:absolute;left:12px;top:-6px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:6px solid rgba(255,255,255,0.95);"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Stałe etykiety</h3>
+      <p>Dymki są zawsze widoczne przy każdym punkcie adnotacji. Prosta, czytelna forma.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Zalety</h4><ul><li>Zawsze widoczne</li><li>Łatwe w użyciu</li></ul></div>
+        <div class="cons"><h4>Wady</h4><ul><li>Zagęszcza widok</li><li>Mniej miejsca na model</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Opcja B: Hover – dymek z opisem -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f0f1e;padding:20px;min-height:220px;display:flex;align-items:center;justify-content:center;position:relative;">
+      <div style="width:100px;height:100px;background:radial-gradient(circle at 40% 35%,#a78bfa,#4c1d95);border-radius:50%;opacity:0.9;position:relative;">
+        <!-- Annotation dot (hovered state - bigger) -->
+        <div style="position:absolute;top:18px;right:-8px;width:14px;height:14px;background:#f59e0b;border-radius:50%;box-shadow:0 0 12px #f59e0b;border:2px solid #fef3c7;"></div>
+        <!-- Rich speech bubble on hover -->
+        <div style="position:absolute;top:-55px;right:-150px;background:#1e1b4b;color:#e0e7ff;font-size:11px;padding:10px 14px;border-radius:10px;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.6);border:1px solid #7c3aed;min-width:140px;">
+          <div style="font-weight:700;color:#a78bfa;margin-bottom:4px;">Płat czołowy</div>
+          <div style="color:#c4b5fd;font-size:10px;line-height:1.4;">Odpowiada za planowanie<br>i kontrolę ruchów</div>
+          <div style="position:absolute;right:20px;bottom:-6px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #7c3aed;"></div>
+        </div>
+      </div>
+      <!-- Other dots (not hovered - small) -->
+      <div style="position:absolute;bottom:45px;left:65px;width:8px;height:8px;background:#fbbf24;border-radius:50%;box-shadow:0 0 5px #fbbf24;opacity:0.6;"></div>
+      <div style="position:absolute;top:35px;left:50px;width:8px;height:8px;background:#fbbf24;border-radius:50%;box-shadow:0 0 5px #fbbf24;opacity:0.6;"></div>
+      <div style="position:absolute;bottom:30px;right:40px;width:8px;height:8px;background:#fbbf24;border-radius:50%;box-shadow:0 0 5px #fbbf24;opacity:0.6;"></div>
+    </div>
+    <div class="card-body">
+      <h3>B — Hover z opisem (zalecane)</h3>
+      <p>Dymek pojawia się po najechaniu na punkt. Zawiera nazwę i krótki opis anatomiczny.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Zalety</h4><ul><li>Bogaty opis</li><li>Model nie jest zasłonięty</li></ul></div>
+        <div class="cons"><h4>Wady</h4><ul><li>Wymaga najeżdżania</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Opcja C: Klik – panel boczny -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0f0f1e;padding:20px;min-height:220px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+      <div style="width:80px;height:80px;background:radial-gradient(circle at 40% 35%,#a78bfa,#4c1d95);border-radius:50%;opacity:0.9;position:relative;flex-shrink:0;">
+        <!-- Annotation dot (clicked) -->
+        <div style="position:absolute;top:14px;right:-6px;width:12px;height:12px;background:#f59e0b;border-radius:50%;box-shadow:0 0 10px #f59e0b;border:2px solid white;"></div>
+      </div>
+      <!-- Side panel appearing after click -->
+      <div style="margin-left:16px;background:#1e1b4b;border:1px solid #7c3aed;border-radius:10px;padding:12px;font-size:10px;color:#e0e7ff;max-width:130px;flex-shrink:0;">
+        <div style="font-weight:700;color:#a78bfa;font-size:12px;margin-bottom:6px;">Płat czołowy</div>
+        <div style="color:#c4b5fd;line-height:1.5;margin-bottom:8px;">Odpowiada za planowanie, kontrolę ruchów dowolnych i funkcje wykonawcze.</div>
+        <div style="background:#2d1b69;border-radius:6px;padding:6px;font-size:9px;color:#818cf8;">
+          Płat czołowy (lobus frontalis)
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Klik otwiera panel</h3>
+      <p>Kliknięcie w punkt otwiera panel boczny z pełnym opisem i nazwą łacińską.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Zalety</h4><ul><li>Dużo miejsca na treść</li><li>Pełne opisy</li></ul></div>
+        <div class="cons"><h4>Wady</h4><ul><li>Wymaga kliknięcia</li><li>Zasłania model</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;font-size:12px;">Kliknij kartę żeby wybrać, albo powiedz mi w terminalu co Ci odpowiada.</p>

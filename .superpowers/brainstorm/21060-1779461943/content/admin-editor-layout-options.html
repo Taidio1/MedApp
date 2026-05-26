@@ -1,0 +1,106 @@
+<h2>Gdzie powinien mieszkać pełny edytor punktów?</h2>
+<p class="subtitle">Kliknij wariant, który najlepiej pasuje do pracy nad anotacjami 3D. Rekomenduję B jako najczystszy MVP.</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="height:260px;background:#14142a;border-radius:8px;overflow:hidden;border:1px solid #2a2a4e;color:#d7d4ff;font-size:11px;display:grid;grid-template-rows:34px 1fr;">
+        <div style="display:flex;align-items:center;gap:10px;padding:0 12px;background:#101024;border-bottom:1px solid #2a2a4e;">
+          <b>Anatomy Studio</b><span style="opacity:.55">Explorer</span><span style="color:#fbbf24">Admin</span>
+        </div>
+        <div style="display:grid;grid-template-columns:78px 1fr 116px;">
+          <div style="padding:10px;background:#1a1a2e;border-right:1px solid #2a2a4e;">
+            <div style="height:10px;background:#34345f;border-radius:3px;margin-bottom:9px"></div>
+            <div style="height:10px;background:#7c3aed;border-radius:3px;margin-bottom:9px"></div>
+            <div style="height:10px;background:#34345f;border-radius:3px;margin-bottom:9px"></div>
+          </div>
+          <div style="position:relative;background:radial-gradient(circle at 48% 52%,#7c3aed 0 8%,#22224a 9% 22%,#17172f 60%);">
+            <div style="position:absolute;left:48%;top:38%;width:9px;height:9px;border-radius:50%;background:#fbbf24;box-shadow:0 0 0 5px rgba(251,191,36,.18)"></div>
+            <div style="position:absolute;left:62%;top:58%;width:7px;height:7px;border-radius:50%;background:#38bdf8"></div>
+            <div style="position:absolute;left:10px;top:10px;background:rgba(0,0,0,.5);border-radius:999px;padding:5px 8px;">Add / Move / Delete</div>
+          </div>
+          <div style="padding:10px;background:#f5f0e8;color:#1f2937;">
+            <b style="font-size:12px">Punkt</b>
+            <div style="height:16px;background:white;border:1px solid #ddd;border-radius:4px;margin-top:8px"></div>
+            <div style="height:44px;background:white;border:1px solid #ddd;border-radius:4px;margin-top:8px"></div>
+            <div style="height:18px;background:#7c3aed;border-radius:5px;margin-top:9px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. Tryb admina w obecnym Explorerze</h3>
+      <p>Szybko dopinamy edycję do istniejącego layoutu. Najmniej nowych tras, ale panel użytkownika i narzędzia admina zaczynają się mieszać.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="height:260px;background:#111827;border-radius:8px;overflow:hidden;border:1px solid #334155;color:#e5e7eb;font-size:11px;display:grid;grid-template-rows:34px 1fr;">
+        <div style="display:flex;align-items:center;gap:10px;padding:0 12px;background:#0f172a;border-bottom:1px solid #334155;">
+          <b>/admin/annotations</b><span style="margin-left:auto;color:#fbbf24">Export TS</span>
+        </div>
+        <div style="display:grid;grid-template-columns:154px 1fr 160px;">
+          <div style="padding:10px;background:#172033;border-right:1px solid #334155;">
+            <b style="font-size:12px;color:#f8fafc">Punkty</b>
+            <div style="margin-top:10px;padding:6px;border-radius:5px;background:#7c3aed;">Komora lewa</div>
+            <div style="margin-top:6px;padding:6px;border-radius:5px;background:#25324a;">Zastawka mitralna</div>
+            <div style="margin-top:6px;padding:6px;border-radius:5px;background:#25324a;">Aorta</div>
+            <div style="position:absolute"></div>
+          </div>
+          <div style="position:relative;background:radial-gradient(circle at 52% 50%,#8b5cf6 0 9%,#26335a 10% 24%,#111827 62%);">
+            <div style="position:absolute;left:14px;top:12px;display:flex;gap:5px;">
+              <span style="background:#fbbf24;color:#111827;border-radius:5px;padding:5px 7px;">+</span>
+              <span style="background:#334155;border-radius:5px;padding:5px 7px;">Move</span>
+              <span style="background:#334155;border-radius:5px;padding:5px 7px;">Size</span>
+              <span style="background:#334155;border-radius:5px;padding:5px 7px;">Eye</span>
+            </div>
+            <div style="position:absolute;left:50%;top:45%;width:10px;height:10px;border-radius:50%;background:#fbbf24;box-shadow:0 0 0 6px rgba(251,191,36,.18)"></div>
+            <div style="position:absolute;left:63%;top:62%;width:8px;height:8px;border-radius:50%;background:#38bdf8"></div>
+            <div style="position:absolute;left:42%;top:29%;width:7px;height:7px;border-radius:50%;background:#22c55e"></div>
+          </div>
+          <div style="padding:10px;background:#f8fafc;color:#111827;border-left:1px solid #cbd5e1;">
+            <b style="font-size:12px">Inspektor</b>
+            <div style="height:16px;background:white;border:1px solid #d1d5db;border-radius:4px;margin-top:8px"></div>
+            <div style="height:16px;background:white;border:1px solid #d1d5db;border-radius:4px;margin-top:7px"></div>
+            <div style="height:48px;background:white;border:1px solid #d1d5db;border-radius:4px;margin-top:7px"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:8px;">
+              <div style="height:16px;background:white;border:1px solid #d1d5db;border-radius:4px"></div>
+              <div style="height:16px;background:white;border:1px solid #d1d5db;border-radius:4px"></div>
+              <div style="height:16px;background:white;border:1px solid #d1d5db;border-radius:4px"></div>
+            </div>
+            <div style="height:19px;background:#7c3aed;border-radius:5px;margin-top:9px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. Osobny ekran admina</h3>
+      <p>Dedykowana trasa z listą punktów, dużym canvasem i inspektorem. Najlepsze dla pełnej edycji, eksportu i późniejszego zabezpieczenia.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="height:260px;background:#16162d;border-radius:8px;overflow:hidden;border:1px solid #2a2a4e;color:#e5e7eb;font-size:11px;position:relative;">
+        <div style="height:34px;background:#101024;border-bottom:1px solid #2a2a4e;display:flex;align-items:center;padding:0 12px;gap:12px"><b>Anatomy Studio</b><span style="opacity:.55">Explorer</span></div>
+        <div style="position:absolute;left:0;top:34px;bottom:0;width:78px;background:#1a1a2e;border-right:1px solid #2a2a4e"></div>
+        <div style="position:absolute;right:0;top:34px;bottom:0;width:104px;background:#f5f0e8;border-left:1px solid #e5e7eb"></div>
+        <div style="position:absolute;left:90px;right:116px;top:46px;bottom:12px;background:radial-gradient(circle at 48% 50%,#7c3aed 0 9%,#24244e 10% 22%,#17172f 58%);border-radius:8px;"></div>
+        <div style="position:absolute;left:112px;top:58px;background:rgba(15,23,42,.92);border:1px solid #475569;border-radius:8px;padding:8px;width:170px;">
+          <b>Narzędzia admina</b>
+          <div style="display:flex;gap:5px;margin-top:8px"><span style="background:#fbbf24;color:#111827;border-radius:4px;padding:4px 6px">+</span><span style="background:#334155;border-radius:4px;padding:4px 6px">Move</span><span style="background:#334155;border-radius:4px;padding:4px 6px">Trash</span></div>
+        </div>
+        <div style="position:absolute;right:126px;bottom:24px;background:#f8fafc;color:#111827;border-radius:8px;padding:9px;width:170px;border:1px solid #cbd5e1;">
+          <b>Edycja punktu</b>
+          <div style="height:13px;background:white;border:1px solid #ddd;border-radius:3px;margin-top:7px"></div>
+          <div style="height:34px;background:white;border:1px solid #ddd;border-radius:3px;margin-top:6px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. Nakładka nad obecnym widokiem</h3>
+      <p>Admin narzędzia pojawiają się jako overlay. Dobre do szybkich poprawek, ale przy pełnym edytorze łatwo robi się ciasno i chaotycznie.</p>
+    </div>
+  </div>
+</div>

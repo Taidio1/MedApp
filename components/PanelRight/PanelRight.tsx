@@ -7,21 +7,10 @@ import { AskRequest, AskResponse, ChatMessage } from '@/lib/types'
 // Sekcja z etykietą i zawartością
 function InfoSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: '16px' }}>
-      <h3
-        style={{
-          fontSize: '10px',
-          fontWeight: 600,
-          color: '#9ca3af',
-          textTransform: 'uppercase',
-          letterSpacing: '0.1em',
-          marginBottom: '6px',
-        }}
-      >
-        {label}
-      </h3>
+    <section className="grid gap-3">
+      <h3 className="section-label">{label}</h3>
       {children}
-    </div>
+    </section>
   )
 }
 
@@ -29,36 +18,11 @@ function InfoSection({ label, children }: { label: string; children: React.React
 function ChatBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === 'user'
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: isUser ? 'flex-end' : 'flex-start',
-        marginBottom: '8px',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: '85%',
-          padding: '8px 12px',
-          borderRadius: isUser ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-          fontSize: '12px',
-          lineHeight: '1.5',
-          background: isUser ? '#7c3aed' : 'white',
-          color: isUser ? 'white' : '#374151',
-          border: isUser ? 'none' : '1px solid #e5e7eb',
-          boxShadow: isUser ? 'none' : '0 1px 3px rgba(0,0,0,0.05)',
-        }}
-      >
+    <div className={isUser ? 'chat-bubble is-user' : 'chat-bubble'}>
+      <div className="chat-bubble-content">
         {message.content}
         {message.role === 'assistant' && (
-          <div
-            style={{
-              fontSize: '9px',
-              color: '#9ca3af',
-              marginTop: '4px',
-              textAlign: 'right',
-            }}
-          >
+          <div className="mt-1 text-right text-[0.62rem] text-[#8a8175]">
             AI ·{' '}
             {message.timestamp.toLocaleTimeString('pl-PL', {
               hour: '2-digit',
@@ -147,275 +111,96 @@ export function PanelRight() {
   }
 
   return (
-    <aside
-      style={{
-        width: '320px',
-        flexShrink: 0,
-        background: '#f5f0e8',
-        borderLeft: '1px solid #e5e7eb',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}
-    >
+    <aside className="right-rail">
       {selectedStructure ? (
-        <>
-          {/* Nagłówek struktury */}
-          <div
-            style={{
-              padding: '20px 20px 16px',
-              borderBottom: '1px solid #e5e7eb',
-              flexShrink: 0,
-              background: 'rgba(255,255,255,0.5)',
-            }}
-          >
-            <h1
-              style={{
-                fontSize: '18px',
-                fontWeight: 700,
-                color: '#111827',
-                lineHeight: 1.3,
-                margin: 0,
-              }}
-            >
-              {selectedStructure.namePL}
-            </h1>
-            <p
-              style={{
-                fontSize: '12px',
-                color: '#7c3aed',
-                fontWeight: 500,
-                marginTop: '2px',
-                fontStyle: 'italic',
-              }}
-            >
-              {selectedStructure.nameLAT}
-            </p>
-            <div style={{ marginTop: '8px' }}>
-              <span
-                style={{
-                  fontSize: '10px',
-                  background: 'rgba(124,58,237,0.1)',
-                  color: '#7c3aed',
-                  padding: '2px 8px',
-                  borderRadius: '999px',
-                }}
-              >
-                {selectedStructure.system}
-              </span>
+        <section className="details-panel">
+          <div className="panel-heading">
+            <span>Szczegóły struktury</span>
+            <span aria-hidden="true">♥</span>
+          </div>
+
+          <div className="detail-hero">
+            <span className="structure-orb" aria-hidden="true" />
+            <div>
+              <h3>{selectedStructure.namePL}</h3>
+              <p>{selectedStructure.nameLAT}</p>
             </div>
           </div>
 
-          {/* Szczegóły struktury — przewijana sekcja */}
-          <div
-            style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '16px 20px',
-            }}
-          >
-            <InfoSection label="Opis">
-              <p
-                style={{
-                  fontSize: '12px',
-                  color: '#4b5563',
-                  lineHeight: 1.6,
-                  margin: 0,
-                }}
-              >
-                {selectedStructure.description}
-              </p>
-            </InfoSection>
+          <dl className="attribute-list">
+            <div>
+              <dt>Układ</dt>
+              <dd>{selectedStructure.system}</dd>
+            </div>
+            <div>
+              <dt>Punkty</dt>
+              <dd>{selectedStructure.annotations.length}</dd>
+            </div>
+          </dl>
 
-            <InfoSection label="Notatki biologiczne">
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: '#4b5563',
-                  lineHeight: 1.6,
-                  background: 'white',
-                  borderRadius: '8px',
-                  padding: '12px',
-                  border: '1px solid #e5e7eb',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                }}
-              >
-                {selectedStructure.biologicalNotes}
-              </div>
-            </InfoSection>
+          <InfoSection label="Opis">
+            <div className="notes-card">
+              <p>{selectedStructure.description}</p>
+            </div>
+          </InfoSection>
 
-            <InfoSection label="Kontekst w bazie wiedzy">
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: '#9ca3af',
-                  fontStyle: 'italic',
-                  background: 'rgba(255,255,255,0.5)',
-                  borderRadius: '6px',
-                  padding: '8px',
-                  border: '1px dashed #d1d5db',
-                }}
-              >
-                Uzupełniane po załadowaniu bazy Bochenka (RAG)
-              </div>
-            </InfoSection>
+          <InfoSection label="Notatki biologiczne">
+            <div className="notes-card">
+              <p>{selectedStructure.biologicalNotes}</p>
+            </div>
+          </InfoSection>
 
-            {/* Sekcja chat AI */}
-            <InfoSection label="Zapytaj AI">
-              <div
-                style={{
-                  background: 'white',
-                  borderRadius: '8px',
-                  border: '1px solid #e5e7eb',
-                  overflow: 'hidden',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                }}
-              >
-                {/* Historia czatu */}
-                {chatMessages.length > 0 && (
-                  <div
-                    style={{
-                      padding: '12px',
-                      maxHeight: '200px',
-                      overflowY: 'auto',
-                      borderBottom: '1px solid #f3f4f6',
-                    }}
-                  >
-                    {chatMessages.map((msg, idx) => (
-                      <ChatBubble key={idx} message={msg} />
-                    ))}
-                    {isAILoading && (
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'flex-start',
-                          marginBottom: '8px',
-                        }}
-                      >
-                        <div
-                          style={{
-                            background: '#f3f4f6',
-                            borderRadius: '8px',
-                            padding: '8px 12px',
-                            fontSize: '12px',
-                            color: '#9ca3af',
-                          }}
-                        >
-                          AI myśli...
-                        </div>
+          <InfoSection label="Zapytaj AI">
+            <div className="chat-card">
+              {chatMessages.length > 0 && (
+                <div className="chat-history">
+                  {chatMessages.map((msg, idx) => (
+                    <ChatBubble key={idx} message={msg} />
+                  ))}
+                  {isAILoading && (
+                    <div className="chat-bubble">
+                      <div className="chat-bubble-content">
+                        AI myśli...
                       </div>
-                    )}
-                    <div ref={chatEndRef} />
-                  </div>
-                )}
-
-                {/* Błąd połączenia */}
-                {errorMessage && (
-                  <div
-                    style={{
-                      padding: '8px 12px',
-                      fontSize: '11px',
-                      color: '#ef4444',
-                      background: '#fef2f2',
-                      borderBottom: '1px solid #fee2e2',
-                    }}
-                  >
-                    {errorMessage}
-                  </div>
-                )}
-
-                {/* Input + przycisk */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 12px',
-                  }}
-                >
-                  <input
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Zadaj pytanie o strukturę..."
-                    disabled={isAILoading}
-                    style={{
-                      flex: 1,
-                      fontSize: '12px',
-                      background: '#f9fafb',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '6px',
-                      padding: '6px 10px',
-                      outline: 'none',
-                      opacity: isAILoading ? 0.5 : 1,
-                    }}
-                  />
-                  <button
-                    onClick={handleAsk}
-                    disabled={!inputValue.trim() || isAILoading}
-                    style={{
-                      padding: '6px 12px',
-                      fontSize: '12px',
-                      background: '#7c3aed',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: !inputValue.trim() || isAILoading ? 'not-allowed' : 'pointer',
-                      opacity: !inputValue.trim() || isAILoading ? 0.4 : 1,
-                      flexShrink: 0,
-                      transition: 'opacity 0.15s',
-                    }}
-                  >
-                    {isAILoading ? '...' : 'Zapytaj'}
-                  </button>
+                    </div>
+                  )}
+                  <div ref={chatEndRef} />
                 </div>
+              )}
+
+              {errorMessage && (
+                <div className="border-b border-red-100 bg-red-50 px-3 py-2 text-[0.72rem] text-red-700">
+                  {errorMessage}
+                </div>
+              )}
+
+              <div className="chat-input-row">
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Zadaj pytanie o strukturę..."
+                  disabled={isAILoading}
+                />
+                <button
+                  onClick={handleAsk}
+                  disabled={!inputValue.trim() || isAILoading}
+                >
+                  {isAILoading ? '...' : 'Zapytaj'}
+                </button>
               </div>
-            </InfoSection>
-          </div>
-        </>
+            </div>
+          </InfoSection>
+        </section>
       ) : (
-        /* Stan gdy brak wybranej struktury */
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '24px',
-            textAlign: 'center',
-          }}
-        >
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '50%',
-              background: 'rgba(124,58,237,0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '24px',
-              marginBottom: '16px',
-            }}
-          >
-            🧠
-          </div>
-          <h2
-            style={{
-              fontSize: '14px',
-              fontWeight: 600,
-              color: '#4b5563',
-              marginBottom: '4px',
-            }}
-          >
-            Wybierz strukturę
-          </h2>
-          <p style={{ fontSize: '12px', color: '#9ca3af', lineHeight: 1.5 }}>
+        <section className="details-panel empty-state">
+          <span className="structure-orb" aria-hidden="true" />
+          <h2>Wybierz strukturę</h2>
+          <p>
             Wybierz strukturę z panelu lewego lub kliknij punkt anotacji na modelu 3D.
           </p>
-        </div>
+        </section>
       )}
     </aside>
   )
