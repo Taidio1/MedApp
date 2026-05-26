@@ -32,6 +32,7 @@ interface AppState {
   setAutoRotate: (rotate: boolean) => void
 
   activeAnnotation: Annotation | null
+  activeAnnotationFocusRequest: number
   setActiveAnnotation: (annotation: Annotation | null) => void
 
   layerVisibility: Record<string, boolean>
@@ -80,6 +81,7 @@ export const useAppStore = create<AppState>((set) => ({
       selectedStructure: structure,
       chatMessages: [],
       activeAnnotation: null,
+      activeAnnotationFocusRequest: 0,
       layerVisibility: {},
       explodeAmount: 0,
       clippingPlaneY: null,
@@ -106,7 +108,14 @@ export const useAppStore = create<AppState>((set) => ({
   setAutoRotate: (rotate) => set({ autoRotate: rotate }),
 
   activeAnnotation: null,
-  setActiveAnnotation: (annotation) => set({ activeAnnotation: annotation }),
+  activeAnnotationFocusRequest: 0,
+  setActiveAnnotation: (annotation) =>
+    set((state) => ({
+      activeAnnotation: annotation,
+      activeAnnotationFocusRequest: annotation
+        ? state.activeAnnotationFocusRequest + 1
+        : state.activeAnnotationFocusRequest,
+    })),
 
   layerVisibility: {},
   setLayerVisibility: (meshId, visible) =>

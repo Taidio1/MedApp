@@ -8,8 +8,10 @@ import { ModelLoader } from './ModelLoader'
 import { LayeredModel } from './LayeredModel'
 import { LayerPanel } from './LayerPanel'
 import { Annotations } from './Annotations'
+import { getAnnotationFocusView } from './cameraFocus'
 import { useAppStore } from '@/lib/store'
 import { RotateCcw, Columns, Maximize2, Scissors, RefreshCw } from 'lucide-react'
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 
 // ─── Toolbar ─────────────────────────────────────────────────────────────────
 
@@ -280,6 +282,94 @@ function CameraResetWatcher() {
   return null
 }
 
+function AnnotationFocusWatcher({
+  controlsRef,
+}: {
+  controlsRef: React.RefObject<OrbitControlsImpl | null>
+}) {
+  const { camera } = useThree()
+  const { width, height } = useThree((state) => state.size)
+  const activeAnnotation = useAppStore((state) => state.activeAnnotation)
+  const activeAnnotationFocusRequest = useAppStore(
+    (state) => state.activeAnnotationFocusRequest,
+  )
+  const lastFocusRequest = useRef(0)
+  const animationRef = useRef<{
+    startedAt: number
+    fromPosition: THREE.Vector3
+    toPosition: THREE.Vector3
+    fromTarget: THREE.Vector3
+    toTarget: THREE.Vector3
+  } | null>(null)
+
+  useEffect(() => {
+    if (!activeAnnotation) {
+      animationRef.current = null
+      return
+    }
+
+    if (
+      activeAnnotationFocusRequest === 0 ||
+      lastFocusRequest.current === activeAnnotationFocusRequest
+    ) {
+      return
+    }
+
+    const aspect = height > 0 ? width / height : 1
+    const focusView = getAnnotationFocusView(activeAnnotation.position, aspect)
+    const controls = controlsRef.current
+
+    lastFocusRequest.current = activeAnnotationFocusRequest
+    animationRef.current = {
+      startedAt: performance.now(),
+      fromPosition: camera.position.clone(),
+      toPosition: new THREE.Vector3(...focusView.position),
+      fromTarget: controls?.target.clone() ?? new THREE.Vector3(0, 0, 0),
+      toTarget: new THREE.Vector3(...focusView.target),
+    }
+  }, [
+    activeAnnotation,
+    activeAnnotationFocusRequest,
+    camera,
+    controlsRef,
+    height,
+    width,
+  ])
+
+  useFrame(() => {
+    const animation = animationRef.current
+    if (!animation) return
+
+    const elapsed = performance.now() - animation.startedAt
+    const progress = Math.min(elapsed / 850, 1)
+    const eased = 1 - Math.pow(1 - progress, 3)
+
+    camera.position.lerpVectors(
+      animation.fromPosition,
+      animation.toPosition,
+      eased,
+    )
+
+    const controls = controlsRef.current
+    if (controls) {
+      controls.target.lerpVectors(
+        animation.fromTarget,
+        animation.toTarget,
+        eased,
+      )
+      controls.update()
+    } else {
+      camera.lookAt(animation.toTarget)
+    }
+
+    if (progress >= 1) {
+      animationRef.current = null
+    }
+  })
+
+  return null
+}
+
 // ─── Main Viewer ──────────────────────────────────────────────────────────────
 
 const LEGEND_COLORS: Record<string, string> = {
@@ -355,6 +445,7 @@ function ViewerWelcome() {
 
 export function Viewer3D() {
   const { selectedStructure, autoRotate, clippingPlaneY } = useAppStore()
+  const controlsRef = useRef<OrbitControlsImpl | null>(null)
 
   const modelUrl = selectedStructure
     ? `/models/${selectedStructure.id}.glb`
@@ -426,8 +517,10 @@ export function Viewer3D() {
             <Annotations />
             <WASDControls />
             <CameraResetWatcher />
+            <AnnotationFocusWatcher controlsRef={controlsRef} />
 
             <OrbitControls
+              ref={controlsRef}
               makeDefault
               autoRotate={autoRotate}
               autoRotateSpeed={0.7}
