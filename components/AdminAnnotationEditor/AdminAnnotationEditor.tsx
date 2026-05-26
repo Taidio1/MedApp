@@ -339,18 +339,19 @@ export function AdminAnnotationEditor() {
 
   return (
     <main className="grid h-screen grid-rows-[44px_1fr] overflow-hidden bg-[#101827] text-slate-100">
-      <header className="flex items-center gap-4 border-b border-[#26364f] bg-[#0f172a] px-5">
-        <div className="text-sm font-semibold">Admin Annotations</div>
-        <div className="rounded border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-200">
-          development only
-        </div>
+      <header className="flex items-center gap-3 border-b border-[#26364f] bg-[#0f172a] px-5">
         <Link
-          href="/"
-          className="ml-auto rounded border border-[#334155] px-3 py-1.5 text-xs font-semibold text-slate-200 transition-colors hover:border-[#fbbf24] hover:text-[#fbbf24]"
+          href="/admin"
+          className="rounded border border-[#334155] px-3 py-1.5 text-xs font-semibold text-slate-300 transition-colors hover:border-[#fbbf24] hover:text-[#fbbf24]"
         >
-          Wróć do learnera
+          ← Panel admina
         </Link>
-        <div className="text-[11px] text-slate-400">
+        <div className="h-4 w-px bg-[#26364f]" />
+        <div className="text-sm font-semibold text-slate-100">Anotacje</div>
+        <div className="rounded border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-200">
+          dev only
+        </div>
+        <div className="ml-auto text-[11px] text-slate-400">
           {saveState === 'idle' && 'Bez zmian'}
           {saveState === 'dirty' && 'Oczekuje na zapis...'}
           {saveState === 'saving' && 'Zapisuję...'}

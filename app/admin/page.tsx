@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { requireAdmin } from '@/lib/auth/guards'
 
 const SERIF = '"Iowan Old Style","Baskerville","Libre Baskerville",Georgia,serif'
@@ -17,6 +18,9 @@ export default async function AdminPage() {
 
   return (
     <main style={{ maxWidth: 900, margin: '60px auto', padding: '0 24px', fontFamily: SANS }}>
+      <Link href="/" style={{ fontSize: 13, color: TEXT_MID, textDecoration: 'none', display: 'inline-block', marginBottom: 20 }}>
+        ← Wróć do learnera
+      </Link>
       <h1 style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 500, color: TEXT_MAIN, marginBottom: 8 }}>
         Panel admina
       </h1>

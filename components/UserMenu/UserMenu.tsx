@@ -28,7 +28,7 @@ export function UserMenu({ email, displayName, isAdmin }: UserMenuProps) {
 
       {isAdmin && (
         <Link
-          href="/admin/annotations"
+          href="/admin"
           className="user-menu-link"
         >
           Admin
