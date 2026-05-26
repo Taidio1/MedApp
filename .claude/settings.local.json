@@ -75,7 +75,10 @@
       "Skill(superpowers:writing-plans)",
       "Skill(superpowers:subagent-driven-development)",
       "Skill(superpowers:finishing-a-development-branch)",
-      "PowerShell(Get-ChildItem \"E:\\\\MedApp\" -Force | Select-Object Name, Attributes | Where-Object { $_.Name -notlike \"node_modules\" })"
+      "PowerShell(Get-ChildItem \"E:\\\\MedApp\" -Force | Select-Object Name, Attributes | Where-Object { $_.Name -notlike \"node_modules\" })",
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(Get-ChildItem -Path \"E:\\\\MedApp\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)"
     ]
   }
 }

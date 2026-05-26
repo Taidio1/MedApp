@@ -1,6 +1,7 @@
 'use client'
 
 import type { CSSProperties } from 'react'
+import Link from 'next/link'
 import { PanelBottom } from '@/components/PanelBottom/PanelBottom'
 import { PanelLeft } from '@/components/PanelLeft/PanelLeft'
 import { PanelRight } from '@/components/PanelRight/PanelRight'
@@ -73,10 +74,10 @@ export function AppShell({ email, displayName, isAdmin }: AppShellProps) {
             <span aria-hidden="true">☰</span>
             <small>Nauka</small>
           </a>
-          <a href="#quiz" aria-label="Quiz">
+          <Link href="/quiz" aria-label="Quiz">
             <span aria-hidden="true">◎</span>
             <small>Quiz</small>
-          </a>
+          </Link>
           <UserMenu email={email} displayName={displayName} isAdmin={isAdmin} />
         </nav>
       </header>
