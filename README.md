@@ -64,7 +64,10 @@ cp .env.example .env
 # 2. Zbuduj i uruchom wszystkie serwisy
 docker compose up --build
 
-# Aplikacja dostępna pod http://localhost
+# Aplikacja dostępna pod http://localhost:8080
+#
+# Jeśli chcesz wystawić ją na innych portach:
+# HTTP_PORT=80 HTTPS_PORT=443 docker compose up --build
 ```
 
 ---
