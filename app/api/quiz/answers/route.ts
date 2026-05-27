@@ -1,8 +1,9 @@
-import { requireUser } from '@/lib/auth/guards'
+import { getCurrentUserProfile } from '@/lib/auth/guards'
 import { saveQuizAnswer } from '@/lib/supabase/quiz'
 
 export async function POST(request: Request) {
-  await requireUser()
+  const profile = await getCurrentUserProfile()
+  if (!profile) return Response.json({ error: 'Brak autoryzacji' }, { status: 401 })
   let body: {
     sessionId?: unknown
     questionId?: unknown

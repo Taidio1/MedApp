@@ -22,6 +22,11 @@ export async function PUT(
   if (b.sys !== undefined) update.sys = b.sys
   if (b.title !== undefined) update.title = b.title
   if (b.read_time !== undefined) update.read_time = b.read_time
+  if (b.illustration_url !== undefined) {
+    update.illustration_url = typeof b.illustration_url === 'string' && b.illustration_url.trim()
+      ? b.illustration_url.trim()
+      : null
+  }
   try {
     const supabase = await createSupabaseServerClient()
     const { data, error } = await supabase

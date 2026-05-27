@@ -39,6 +39,13 @@ export interface DbLeaderboardEntry {
   total_sessions: number
 }
 
+export interface UserQuizSummary {
+  completedSessions: number
+  averageScorePercent: number
+  bestStreak: number
+  totalTimeSeconds: number
+}
+
 export function mapDbQuestionToUi(q: DbQuizQuestion): QuizQuestion {
   return {
     id: q.id,
@@ -153,6 +160,31 @@ export async function fetchUserQuizHistory(userId: string): Promise<QuizHistoryE
       time: `${mins}:${secs}`,
     }
   })
+}
+
+export async function fetchUserQuizSummary(userId: string): Promise<UserQuizSummary> {
+  const supabase = await createSupabaseServerClient()
+  const { data, error } = await supabase
+    .from('quiz_sessions')
+    .select('correct_count, total_questions, max_streak, time_elapsed_seconds')
+    .eq('user_id', userId)
+    .not('completed_at', 'is', null)
+
+  if (error) throw new Error(error.message)
+
+  const sessions = data ?? []
+  const completedSessions = sessions.length
+  const totalQuestions = sessions.reduce((sum, row) => sum + (row.total_questions as number), 0)
+  const totalCorrect = sessions.reduce((sum, row) => sum + (row.correct_count as number), 0)
+  const totalTimeSeconds = sessions.reduce((sum, row) => sum + (row.time_elapsed_seconds as number), 0)
+  const bestStreak = sessions.reduce((best, row) => Math.max(best, row.max_streak as number), 0)
+
+  return {
+    completedSessions,
+    averageScorePercent: totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0,
+    bestStreak,
+    totalTimeSeconds,
+  }
 }
 
 export async function fetchQuizLeaderboard(): Promise<DbLeaderboardEntry[]> {

@@ -1,8 +1,9 @@
-import { requireUser } from '@/lib/auth/guards'
+import { getCurrentUserProfile } from '@/lib/auth/guards'
 import { saveStudySession, upsertCardProgress } from '@/lib/supabase/nauka'
 
 export async function POST(req: Request) {
-  const profile = await requireUser()
+  const profile = await getCurrentUserProfile()
+  if (!profile) return Response.json({ error: 'Brak autoryzacji' }, { status: 401 })
   const body = await req.json() as {
     mode: 'nolimit' | 'pomodoro'
     system: string

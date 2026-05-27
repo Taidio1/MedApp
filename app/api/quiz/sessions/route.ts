@@ -1,8 +1,9 @@
-import { requireUser } from '@/lib/auth/guards'
+import { getCurrentUserProfile } from '@/lib/auth/guards'
 import { createQuizSession, completeQuizSession } from '@/lib/supabase/quiz'
 
 export async function POST(request: Request) {
-  const profile = await requireUser()
+  const profile = await getCurrentUserProfile()
+  if (!profile) return Response.json({ error: 'Brak autoryzacji' }, { status: 401 })
   let body: {
     mode?: unknown
     systemFilter?: unknown
@@ -38,7 +39,8 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  await requireUser()
+  const patchProfile = await getCurrentUserProfile()
+  if (!patchProfile) return Response.json({ error: 'Brak autoryzacji' }, { status: 401 })
   let body: {
     sessionId?: unknown
     correctCount?: unknown

@@ -36,7 +36,7 @@ export function QuizRightPanel({ screen, questions, idx, answers, timeElapsed, s
       {inQuiz && (
         <div style={{ background: '#fbf7ee', border: '1px solid rgba(91,78,60,0.14)', borderRadius: 10, padding: '16px 18px', boxShadow: '0 4px 14px rgba(78,66,48,0.06)' }}>
           <PanelHeader icon="⏱" title="Sesja quizu" />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div className="quiz-stat-grid">
             {timeElapsed !== null && (
               <div style={{ background: '#f1eadc', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
                 <div style={{ fontSize: 22, fontWeight: 700, color: timerColor, fontFamily: 'Inter,sans-serif', fontVariantNumeric: 'tabular-nums' }}>{mm}:{ss}</div>

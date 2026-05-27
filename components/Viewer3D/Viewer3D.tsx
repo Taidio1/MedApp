@@ -10,12 +10,18 @@ import { LayerPanel } from './LayerPanel'
 import { Annotations } from './Annotations'
 import { getAnnotationFocusView } from './cameraFocus'
 import { useAppStore } from '@/lib/store'
-import { RotateCcw, Columns, Maximize2, Scissors, RefreshCw } from 'lucide-react'
+import { RotateCcw, Columns, Maximize2, Scissors, RefreshCw, HeartPulse } from 'lucide-react'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 
 // ─── Toolbar ─────────────────────────────────────────────────────────────────
 
-function ViewerToolbar() {
+function ViewerToolbar({
+  heartBeating,
+  onHeartBeatChange,
+}: {
+  heartBeating: boolean
+  onHeartBeatChange: (beating: boolean) => void
+}) {
   const {
     autoRotate, setAutoRotate,
     triggerCameraReset,
@@ -27,6 +33,7 @@ function ViewerToolbar() {
   } = useAppStore()
 
   const hasLayers = !!selectedStructure?.layers?.length
+  const canBeat = selectedStructure?.id === 'serce'
   const [showExplodeSlider, setShowExplodeSlider] = useState(false)
   const [showClipSlider, setShowClipSlider] = useState(false)
 
@@ -36,6 +43,7 @@ function ViewerToolbar() {
     setClippingPlaneY(null)
     setSplitOpen(false)
     resetLayerVisibility()
+    onHeartBeatChange(false)
     setShowExplodeSlider(false)
     setShowClipSlider(false)
   }
@@ -69,6 +77,14 @@ function ViewerToolbar() {
           active={autoRotate}
           onClick={() => setAutoRotate(!autoRotate)}
         />
+        {canBeat && (
+          <ToolbarBtn
+            icon={<HeartPulse size={15} />}
+            label="Bicie"
+            active={heartBeating}
+            onClick={() => onHeartBeatChange(!heartBeating)}
+          />
+        )}
         <ToolbarBtn
           icon={<Columns size={15} />}
           label="Split"
@@ -446,12 +462,18 @@ function ViewerWelcome() {
 export function Viewer3D() {
   const { selectedStructure, autoRotate, clippingPlaneY } = useAppStore()
   const controlsRef = useRef<OrbitControlsImpl | null>(null)
+  const [heartBeating, setHeartBeating] = useState(false)
 
   const modelUrl = selectedStructure
     ? `/models/${selectedStructure.id}.glb`
     : null
 
   const hasLayers = !!(selectedStructure?.layers?.length)
+  const isHeartModel = selectedStructure?.id === 'serce'
+
+  useEffect(() => {
+    if (!isHeartModel) setHeartBeating(false)
+  }, [isHeartModel])
 
   if (!modelUrl) {
     return (
@@ -470,7 +492,10 @@ export function Viewer3D() {
         </div>
       </div>
 
-      <ViewerToolbar />
+      <ViewerToolbar
+        heartBeating={heartBeating}
+        onHeartBeatChange={setHeartBeating}
+      />
 
       {hasLayers && selectedStructure?.layers && (
         <LayerPanel layers={selectedStructure.layers} />
@@ -503,7 +528,11 @@ export function Viewer3D() {
                   layers={selectedStructure.layers}
                 />
               ) : (
-                <ModelLoader key={modelUrl} url={modelUrl} />
+                <ModelLoader
+                  key={modelUrl}
+                  url={modelUrl}
+                  isAnimationPlaying={heartBeating}
+                />
               )}
               <ContactShadows
                 position={[0, -1.55, 0]}
@@ -522,7 +551,7 @@ export function Viewer3D() {
             <OrbitControls
               ref={controlsRef}
               makeDefault
-              autoRotate={autoRotate}
+              autoRotate={autoRotate && !heartBeating}
               autoRotateSpeed={0.7}
               minDistance={3.2}
               maxDistance={8.4}

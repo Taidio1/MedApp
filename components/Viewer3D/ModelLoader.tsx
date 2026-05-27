@@ -1,7 +1,7 @@
 'use client'
 
-import { useGLTF } from '@react-three/drei'
-import { Component, ReactNode, useMemo } from 'react'
+import { useAnimations, useGLTF } from '@react-three/drei'
+import { Component, ReactNode, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
 // ErrorBoundary do obsługi braku pliku .glb
@@ -53,8 +53,14 @@ export function PlaceholderMesh() {
 }
 
 // Komponent ładujący model .glb
-function GLBModel({ url }: { url: string }) {
-  const { scene } = useGLTF(url)
+function GLBModel({
+  url,
+  isAnimationPlaying = false,
+}: {
+  url: string
+  isAnimationPlaying?: boolean
+}) {
+  const { scene, animations } = useGLTF(url)
   const normalizedScene = useMemo(() => {
     const model = scene.clone(true)
     const box = new THREE.Box3().setFromObject(model)
@@ -74,19 +80,48 @@ function GLBModel({ url }: { url: string }) {
     return model
   }, [scene])
 
+  const { actions, names } = useAnimations(animations, normalizedScene)
+  const primaryActionName = names[0]
+  const primaryAction = primaryActionName ? actions[primaryActionName] : null
+
+  useEffect(() => {
+    if (!primaryAction) return
+
+    primaryAction.setLoop(THREE.LoopRepeat, Infinity)
+    primaryAction.clampWhenFinished = false
+
+    if (isAnimationPlaying) {
+      primaryAction
+        .reset()
+        .setEffectiveTimeScale(1)
+        .setEffectiveWeight(1)
+        .fadeIn(0.25)
+        .play()
+    } else {
+      primaryAction.fadeOut(0.35)
+    }
+  }, [isAnimationPlaying, primaryAction])
+
+  useEffect(() => {
+    return () => {
+      primaryAction?.stop()
+    }
+  }, [primaryAction])
+
   return <primitive object={normalizedScene} />
 }
 
 interface ModelLoaderProps {
   /** Ścieżka do pliku .glb względem /public */
   url: string
+  isAnimationPlaying?: boolean
 }
 
 /** Ładuje model .glb z automatycznym fallbackiem na placeholder */
-export function ModelLoader({ url }: ModelLoaderProps) {
+export function ModelLoader({ url, isAnimationPlaying = false }: ModelLoaderProps) {
   return (
     <ModelErrorBoundary fallback={<PlaceholderMesh />}>
-      <GLBModel url={url} />
+      <GLBModel url={url} isAnimationPlaying={isAnimationPlaying} />
     </ModelErrorBoundary>
   )
 }

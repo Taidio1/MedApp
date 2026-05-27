@@ -74,13 +74,13 @@ export function QuizModePanel({
   }
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-[1fr_170px] gap-3">
+    <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_170px]">
       <div className="quiz-card p-3">
         <p className="text-[9px] font-semibold uppercase tracking-widest text-[#9ca3af]">
           Pytanie {score.answered + 1}
         </p>
         <h3 className="mt-1 text-sm font-bold text-[#111827]">{question.prompt}</h3>
-        <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {question.options.map((option) => {
             const selected = selectedAnswerId === option.id
             const isTarget = option.id === question.target.id

@@ -1,8 +1,9 @@
-import { requireUser } from '@/lib/auth/guards'
+import { getCurrentUserProfile } from '@/lib/auth/guards'
 import { fetchReadingMaterials } from '@/lib/supabase/nauka'
 
 export async function GET() {
-  await requireUser()
+  const profile = await getCurrentUserProfile()
+  if (!profile) return Response.json([])
   try {
     const materials = await fetchReadingMaterials()
     return Response.json(materials)
