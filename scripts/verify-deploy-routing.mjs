@@ -29,6 +29,18 @@ assert(
   'nginx must not strip /api before Next.js can handle route handlers',
 )
 assert(
+  /proxy_buffer_size\s+32k;/.test(nginx),
+  'nginx must allow large upstream response headers for Supabase auth cookies',
+)
+assert(
+  /proxy_buffers\s+8\s+32k;/.test(nginx),
+  'nginx must configure enough proxy buffers for Supabase auth cookie chunks',
+)
+assert(
+  /proxy_busy_buffers_size\s+64k;/.test(nginx),
+  'nginx must configure busy proxy buffers for large auth responses',
+)
+assert(
   askRoute.includes('BACKEND_API_URL'),
   'app/api/ask must use BACKEND_API_URL for the internal FastAPI service',
 )

@@ -457,11 +457,12 @@
   color: transparent;
 }
 
-.appleLogo {
-  width: 24px;
-  height: 24px;
+.xMark {
   color: #050505;
-  flex: 0 0 auto;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
 }
 
 .modeHint {
