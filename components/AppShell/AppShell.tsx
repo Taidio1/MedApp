@@ -11,9 +11,9 @@ import { Viewer3D } from '@/components/Viewer3D/Viewer3D'
 import { useAppStore } from '@/lib/store'
 
 interface AppShellProps {
-  email: string
-  displayName: string | null
-  isAdmin: boolean
+  email?: string | null
+  displayName?: string | null
+  isAdmin?: boolean
 }
 
 const structureAccents: Record<string, { accent: string; soft: string; color: string }> = {
@@ -42,7 +42,7 @@ function getSystemAccent(system?: string) {
   return { accent: '#9b74b7', soft: '#efe5f6', color: '#9db6dc' }
 }
 
-export function AppShell({ email, displayName, isAdmin }: AppShellProps) {
+export function AppShell({ email, displayName, isAdmin = false }: AppShellProps) {
   const selectedStructure = useAppStore((state) => state.selectedStructure)
   const palette =
     (selectedStructure && structureAccents[selectedStructure.id]) ??
@@ -55,7 +55,7 @@ export function AppShell({ email, displayName, isAdmin }: AppShellProps) {
 
   return (
     <div className="medapp-shell" style={shellStyle}>
-      <AppNavbar active="atlas" email={email} displayName={displayName} isAdmin={isAdmin} />
+      <AppNavbar active="atlas" email={email} displayName={displayName ?? null} isAdmin={isAdmin} />
 
       <div className="medapp-grid" id="explorer">
         <PanelLeft />
