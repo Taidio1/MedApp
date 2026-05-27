@@ -15,6 +15,7 @@ import {
   X,
 } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/auth/browser'
+import { getBrowserPublicOrigin } from '@/lib/site-url'
 import styles from './login.module.css'
 
 type Mode = 'login' | 'register'
@@ -119,7 +120,7 @@ export function LoginForm() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${getBrowserPublicOrigin()}/auth/callback`,
       },
     })
 

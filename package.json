@@ -13,6 +13,7 @@
     "verify:annotation-camera": "node scripts/verify-annotation-camera.mjs",
     "verify:admin-annotations": "node scripts/verify-admin-annotations.mjs",
     "verify:deploy-routing": "node scripts/verify-deploy-routing.mjs",
+    "verify:auth-redirect-origin": "node scripts/verify-auth-redirect-origin.mjs",
     "verify:auth-admin": "node scripts/verify-auth-admin.mjs",
     "verify:ai-suggest": "node scripts/verify-ai-suggest.mjs",
     "verify:auth-navbar": "node scripts/verify-auth-navbar.mjs",
