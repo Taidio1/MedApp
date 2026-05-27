@@ -50,22 +50,22 @@ export function StudyModePanel({
     .join(', ')
 
   return (
-    <div className="study-card grid min-h-0 grid-cols-[1fr_auto] gap-3 p-3">
+    <div className="study-card grid min-h-0 grid-cols-1 gap-3 p-3 sm:grid-cols-[minmax(0,1fr)_auto]">
       <div className="min-w-0">
         <p className="text-[9px] font-semibold uppercase tracking-widest text-[#9ca3af]">
           Krok {safeIndex + 1} z {annotations.length} · {layers}
         </p>
-        <h3 className="mt-1 truncate text-sm font-bold text-[#111827]">
+        <h3 className="mt-1 break-words text-sm font-bold text-[#111827]">
           {annotation.label}
         </h3>
-        <p className="truncate text-[11px] italic text-[#7c3aed]">
+        <p className="line-clamp-2 text-[11px] italic text-[#7c3aed]">
           {annotation.nameLAT ?? 'Nazwa łacińska w opracowaniu'}
         </p>
         <p className="mt-2 line-clamp-2 text-[11px] leading-relaxed text-[#6b7280]">
           {annotation.description ?? 'Opis tego punktu jest w opracowaniu.'}
         </p>
       </div>
-      <div className="flex w-[168px] flex-col justify-between gap-2">
+      <div className="flex w-full flex-col justify-between gap-2 sm:w-[168px]">
         <button
           type="button"
           onClick={() => onToggleRemembered(annotation.id)}

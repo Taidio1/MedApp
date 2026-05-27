@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { AppNavbar } from '@/components/AppNavbar/AppNavbar'
 import type { DbLeaderboardEntry } from '@/lib/supabase/quiz'
 import {
   type QuizQuestion,
@@ -192,9 +193,11 @@ export function QuizPage({ displayName, isAdmin, userId }: QuizPageProps) {
   }
 
   return (
-    <div className="quiz-shell">
+    <div className="quiz-shell app-shell-with-navbar">
+      <AppNavbar active="quiz" displayName={displayName} isAdmin={isAdmin} />
+
       {/* Header */}
-      <header className="quiz-header">
+      <header className="quiz-header quiz-legacy-header">
         <div className="quiz-brand">
           <div className="quiz-brand-orb">✦</div>
           <div className="quiz-brand-text">

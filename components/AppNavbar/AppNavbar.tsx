@@ -36,7 +36,6 @@ export function AppNavbar({ active, displayName, email, isAdmin = false }: AppNa
     <div className="app-navbar">
       <Link href="/" className="app-navbar-brand" aria-label="MedApp Anatomy Studio">
         <strong>MedApp</strong>
-        <span>Anatomy Studio</span>
       </Link>
 
       <nav className="app-navbar-nav" aria-label="Główna nawigacja">

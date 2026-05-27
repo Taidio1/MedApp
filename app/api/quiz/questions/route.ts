@@ -1,8 +1,9 @@
-import { requireUser } from '@/lib/auth/guards'
+import { getCurrentUserProfile } from '@/lib/auth/guards'
 import { fetchQuizQuestions, mapDbQuestionToUi } from '@/lib/supabase/quiz'
 
 export async function GET() {
-  await requireUser()
+  const profile = await getCurrentUserProfile()
+  if (!profile) return Response.json([])
   try {
     const dbQuestions = await fetchQuizQuestions()
     return Response.json(dbQuestions.map(mapDbQuestionToUi))

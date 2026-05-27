@@ -15,7 +15,7 @@ export default async function NaukaMaterialsRoute({ searchParams }: NaukaMateria
   const profile = await getCurrentUserProfile()
   const params = await searchParams
   const systemParam = Array.isArray(params.system) ? params.system[0] : params.system
-  const readings = await fetchReadingMaterials()
+  const readings = profile ? await fetchReadingMaterials() : []
 
   return (
     <div className="quiz-shell app-shell-with-navbar reading-materials-page">

@@ -159,7 +159,7 @@ function ResultsView({ cards, results, onBackToBoard, onRepeat }: {
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: 12 }}>
+      <div className="nauka-action-row">
         <button onClick={onBackToBoard}
           style={{
             flex: 1, padding: '12px', borderRadius: 9,
@@ -224,7 +224,7 @@ export function NaukaSession({
             transition: 'width 0.4s ease',
           }} />
         </div>
-        <div style={{ display: 'flex', gap: 14, flexShrink: 0 }}>
+        <div className="nauka-score-row">
           <span style={{ fontSize: 12.5, color: NK, fontFamily: 'Inter,sans-serif', fontWeight: 700 }}>✓ {knew} znam</span>
           <span style={{ fontSize: 12.5, color: '#e53935', fontFamily: 'Inter,sans-serif', fontWeight: 700 }}>✗ {didnt} nie znam</span>
         </div>
@@ -308,7 +308,7 @@ export function NaukaSession({
             }}>
               {card.answer}
             </p>
-            <div style={{ display: 'flex', gap: 12 }}>
+            <div className="nauka-answer-row">
               <button onClick={() => onAnswer(false)}
                 style={{
                   padding: '10px 24px', borderRadius: 9, cursor: 'pointer',

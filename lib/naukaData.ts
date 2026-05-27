@@ -16,9 +16,11 @@ export interface ReadingSection {
 }
 
 export interface ReadingMaterial {
+  id: string
   sys: string
   title: string
   readTime: number
+  illustrationUrl: string | null
   sections: ReadingSection[]
 }
 

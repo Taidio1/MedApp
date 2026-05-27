@@ -26,3 +26,7 @@ create policy "app_settings_admin_write"
   to authenticated
   using (public.current_user_role() = 'admin')
   with check (public.current_user_role() = 'admin');
+
+-- PostgreSQL wymaga zarówno GRANT jak i RLS
+grant select on public.app_settings to anon, authenticated;
+grant insert, update, delete on public.app_settings to authenticated;

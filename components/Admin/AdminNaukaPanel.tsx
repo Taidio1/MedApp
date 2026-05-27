@@ -28,6 +28,7 @@ interface DbReadingMaterialAdmin {
   sys: string
   title: string
   read_time: number
+  illustration_url: string | null
   reading_sections: DbSection[]
 }
 
@@ -59,7 +60,7 @@ const blankFC = (): Partial<DbFlashcard> => ({
   id: '', question: '', answer: '', system: SYSTEMS[0],
   difficulty: 'basic', mnemonic: '', details: '', struct: '',
 })
-const blankMaterial = () => ({ sys: SYSTEMS[0], title: '', read_time: 5 })
+const blankMaterial = () => ({ sys: SYSTEMS[0], title: '', read_time: 5, illustration_url: '' })
 const blankSection = () => ({ id: '', title: '', content: '', sort_order: 0 })
 
 // ── Shared UI ──────────────────────────────────────────────────────────────
@@ -220,7 +221,7 @@ export function AdminNaukaPanel() {
 
   function openAddRM() { setEditingRM(null); setRmForm(blankMaterial()); setFormErrRM(null); setRmModal('add') }
   function openEditRM(rm: DbReadingMaterialAdmin) {
-    setEditingRM(rm); setRmForm({ sys: rm.sys, title: rm.title, read_time: rm.read_time })
+    setEditingRM(rm); setRmForm({ sys: rm.sys, title: rm.title, read_time: rm.read_time, illustration_url: rm.illustration_url ?? '' })
     setFormErrRM(null); setRmModal('edit')
   }
 
@@ -390,7 +391,7 @@ export function AdminNaukaPanel() {
                       {expandedRM.has(rm.id) ? '▼' : '▶'}
                     </button>
                     <span style={{ flex: 1, fontWeight: 600, color: TEXT_MAIN, fontSize: 14 }}>{rm.title}</span>
-                    <span style={{ fontSize: 12.5, color: TEXT_MID }}>{rm.sys} · {rm.read_time} min</span>
+                    <span style={{ fontSize: 12.5, color: TEXT_MID }}>{rm.sys} · {rm.read_time} min{rm.illustration_url ? ' · ilustracja' : ''}</span>
                     <button onClick={() => openEditRM(rm)} style={{ ...actionBtnStyle, color: NK }}>Edytuj</button>
                     <button onClick={() => deleteRM(rm.id)} style={{ ...actionBtnStyle, color: '#e05252' }}>Usuń</button>
                   </div>
@@ -485,6 +486,11 @@ export function AdminNaukaPanel() {
           <Field label="Czas czytania (min) *">
             <input style={inputStyle} type="number" min={1} value={rmForm.read_time}
               onChange={e => setRmForm(f => ({ ...f, read_time: Number(e.target.value) }))} />
+          </Field>
+          <Field label="URL ilustracji">
+            <input style={inputStyle} value={rmForm.illustration_url}
+              placeholder="/nauka-heart.png albo https://..."
+              onChange={e => setRmForm(f => ({ ...f, illustration_url: e.target.value }))} />
           </Field>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
             <Btn variant="ghost" onClick={() => setRmModal(null)}>Anuluj</Btn>
