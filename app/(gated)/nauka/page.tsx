@@ -1,4 +1,4 @@
-import { requireUser } from '@/lib/auth/guards'
+import { getCurrentUserProfile } from '@/lib/auth/guards'
 import { NaukaPage } from '@/components/Nauka/NaukaPage'
 
 export const metadata = {
@@ -6,12 +6,12 @@ export const metadata = {
 }
 
 export default async function NaukaRoute() {
-  const profile = await requireUser()
+  const profile = await getCurrentUserProfile()
 
   return (
     <NaukaPage
-      displayName={profile.displayName}
-      isAdmin={profile.role === 'admin'}
+      displayName={profile?.displayName ?? null}
+      isAdmin={profile?.role === 'admin'}
     />
   )
 }
