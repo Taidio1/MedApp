@@ -14,6 +14,7 @@ export default async function AdminPage() {
     { href: '/admin/nauka', title: 'Nauka', desc: 'Fiszki i materiały do czytania', accent: '#2a7a60', bg: '#edf9f5' },
     { href: '/admin/quiz', title: 'Quiz', desc: 'Pytania quizowe', accent: '#7c3aed', bg: '#f5f0ff' },
     { href: '/admin/annotations', title: 'Anotacje', desc: 'Punkty anotacji 3D', accent: '#5b4e3c', bg: '#fbf7ee' },
+    { href: '/admin/settings', title: 'Ustawienia', desc: 'Tryb prezentacyjny i dostęp', accent: '#64748b', bg: '#f8fafc' },
   ]
 
   return (
