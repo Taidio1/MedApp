@@ -19,7 +19,7 @@ export function HeartDiagram({ selected, onSelect, target, revealed }: HeartDiag
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-      <svg viewBox="0 0 200 188" style={{ width: 270, height: 255, display: 'block' }}>
+      <svg viewBox="0 0 200 188" style={{ width: 'min(270px, 100%)', height: 'auto', display: 'block' }}>
         <rect width="200" height="188" fill="#fbf7ee" rx="6" />
         <path d="M 22,42 L 22,128 L 56,160 L 100,174 L 144,160 L 178,128 L 178,42"
           fill="none" stroke="rgba(91,78,60,0.18)" strokeWidth="1.5" strokeLinejoin="round" />

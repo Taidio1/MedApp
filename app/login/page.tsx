@@ -7,26 +7,26 @@ export default async function LoginPage() {
   if (profile) redirect('/')
 
   return (
-    <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+    <div className="flex min-h-dvh items-center justify-center bg-[var(--app-bg)] px-4 py-8 text-[var(--ink)]">
+      <div className="w-full max-w-[400px]">
         {/* Logo */}
         <div className="flex flex-col items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-lg bg-[#7c3aed] flex items-center justify-center">
-            <span className="text-white text-lg font-bold">A</span>
+          <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-[rgba(124,107,196,0.28)] bg-[var(--qz-accent-soft)]">
+            <span className="text-lg font-bold text-[var(--qz-accent)]">A</span>
           </div>
           <div className="text-center">
-            <h1 className="text-white font-semibold text-lg tracking-wide">
+            <h1 className="font-serif text-xl font-medium tracking-normal text-[var(--ink)]">
               Anatomy Studio
             </h1>
-            <p className="text-gray-500 text-xs mt-1">
+            <p className="mt-1 text-xs italic text-[var(--muted)]">
               Interaktywny eksplorator anatomii 3D
             </p>
           </div>
         </div>
 
         {/* Login card */}
-        <div className="rounded-xl bg-[#12122a] border border-[#2a2a4e] p-6">
-          <h2 className="text-white text-sm font-semibold mb-4">Logowanie</h2>
+        <div className="rounded-lg border border-[var(--line)] bg-[var(--paper)] p-5 shadow-[var(--shadow-soft)] sm:p-6">
+          <h2 className="mb-4 text-sm font-semibold text-[var(--ink)]">Logowanie</h2>
           <LoginForm />
         </div>
       </div>

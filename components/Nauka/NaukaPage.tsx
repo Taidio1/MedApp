@@ -3,13 +3,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { AppNavbar } from '@/components/AppNavbar/AppNavbar'
 import type { NaukaCard, ReadingMaterial } from '@/lib/naukaData'
 import type { UserNaukaStats } from '@/lib/supabase/nauka'
-import { NaukaLeftPanel } from './NaukaLeftPanel'
 import { NaukaRightPanel } from './NaukaRightPanel'
 import { NaukaHome } from './NaukaHome'
 import { NaukaSession } from './NaukaSession'
 import { NaukaReading } from './NaukaReading'
+import { NaukaMobileHome } from './NaukaMobileHome'
 
 interface NaukaPageProps {
   displayName: string | null
@@ -25,6 +27,8 @@ const NOTE_DEBOUNCE   = 1500
 const NK = '#2a7a60'
 
 export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [screen, setScreen]             = useState<NaukaScreen>('tablica')
   const [sessionCards, setSessionCards] = useState<NaukaCard[]>([])
   const [cardIdx, setCardIdx]           = useState(0)
@@ -34,7 +38,7 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
   const [timeLeft, setTimeLeft]         = useState<number | null>(null)
   const [isPaused, setIsPaused]         = useState(false)
   const [notes, setNotes]               = useState<Record<string, string>>({})
-  const [config, setConfig]             = useState({ sys: 'Wszystkie układy', mode: 'nolimit' as 'nolimit' | 'pomodoro' })
+  const [config, setConfig]             = useState({ sys: 'Układ Krążenia', mode: 'nolimit' as 'nolimit' | 'pomodoro' })
   const [readSysKey, setReadSysKey]     = useState('Układ Krążenia')
   const [readSection, setReadSection]   = useState(0)
 
@@ -49,6 +53,7 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
   const sessionStartedAt = useRef<string | null>(null)
   const sessionSaved     = useRef(false)
   const noteTimers       = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const urlSessionStarted = useRef(false)
 
   useEffect(() => {
     const timers = noteTimers.current
@@ -123,20 +128,35 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
     )
   }, [phase]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const startSession = useCallback(() => {
-    const pool     = config.sys === 'Wszystkie układy' ? cards : cards.filter(c => c.system === config.sys)
+  const startSession = useCallback((overrides?: Partial<typeof config>) => {
+    const sessionConfig = { ...config, ...overrides }
+    const pool     = sessionConfig.sys === 'Wszystkie układy' ? cards : cards.filter(c => c.system === sessionConfig.sys)
     const shuffled = [...pool].sort(() => Math.random() - 0.5)
+    if (overrides) setConfig(sessionConfig)
     setSessionCards(shuffled)
     setCardIdx(0)
     setFlipped(false)
     setResults({})
     setPhase('running')
-    setTimeLeft(config.mode === 'pomodoro' ? POMODORO : null)
+    setTimeLeft(sessionConfig.mode === 'pomodoro' ? POMODORO : null)
     setIsPaused(false)
     setScreen('sesja')
     sessionStartedAt.current = new Date().toISOString()
     sessionSaved.current     = false
   }, [config, cards])
+
+  useEffect(() => {
+    const startParam = searchParams.get('start')
+    const shouldStartSession = startParam === 'session'
+    if (!shouldStartSession || urlSessionStarted.current || loading || cards.length === 0) return
+
+    urlSessionStarted.current = true
+    const systemParam = searchParams.get('system')
+    const nextSys = systemParam && (systemParam === 'Wszystkie układy' || cards.some(card => card.system === systemParam))
+      ? systemParam
+      : config.sys
+    startSession({ sys: nextSys })
+  }, [cards, config.sys, loading, searchParams, startSession])
 
   const handleAnswer = (knew: boolean) => {
     const card = sessionCards[cardIdx]
@@ -157,10 +177,10 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
   }
 
   const handleRead = () => {
-    const readSys = config.sys !== 'Wszystkie układy' ? config.sys : 'Układ Krążenia'
-    setReadSysKey(readSys)
+    const readSys = config.sys
+    setReadSysKey(readSys === 'Wszystkie układy' ? 'Układ Krążenia' : readSys)
     setReadSection(0)
-    setScreen('czytaj')
+    router.push(`/nauka/materialy${readSys !== 'Wszystkie układy' ? `?system=${encodeURIComponent(readSys)}` : ''}`)
   }
 
   const handleNoteChange = (cardId: string, text: string) => {
@@ -203,9 +223,55 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
   }
 
   return (
-    <div className="quiz-shell" style={shellStyle}>
+    <div className="quiz-shell app-shell-with-navbar" style={shellStyle}>
+      <AppNavbar active="nauka" displayName={displayName} isAdmin={isAdmin} />
+
+      {screen === 'tablica' ? (
+        <NaukaMobileHome
+          configSys={config.sys}
+          configMode={config.mode}
+          progress={progress}
+          stats={stats}
+          cards={cards}
+          notes={notes}
+          onConfigSysChange={sys => setConfig(prev => ({ ...prev, sys }))}
+          onConfigModeChange={mode => setConfig(prev => ({ ...prev, mode }))}
+          onStart={() => startSession()}
+          onRead={handleRead}
+        />
+      ) : (
+        <div className="nauka-mobile-page nauka-mobile-workspace">
+          <main className="nauka-mobile-main">
+            <button
+              type="button"
+              className="reading-materials-back nauka-mobile-back"
+              onClick={() => { setScreen('tablica'); setPhase('running') }}
+            >
+              ← Nauka
+            </button>
+            {screen === 'sesja' && (
+              <NaukaSession
+                cards={sessionCards}
+                cardIdx={cardIdx}
+                flipped={flipped}
+                results={results}
+                phase={phase}
+                timeLeft={timeLeft}
+                isPaused={isPaused}
+                configMode={config.mode}
+                onFlip={() => setFlipped(true)}
+                onAnswer={handleAnswer}
+                onPauseToggle={() => setIsPaused(p => !p)}
+                onBackToBoard={() => { setScreen('tablica'); setPhase('running') }}
+                onRepeat={() => startSession()}
+              />
+            )}
+          </main>
+        </div>
+      )}
+
       {/* Header */}
-      <header className="quiz-header">
+      <header className="quiz-header nauka-legacy-header">
         <div className="quiz-brand">
           <div className="quiz-brand-orb" style={{ borderColor: 'rgba(42,122,96,0.3)' }}>✦</div>
           <div className="quiz-brand-text">
@@ -235,37 +301,36 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
         </nav>
       </header>
 
-      {/* 3-column body */}
-      <div className="quiz-body">
-        <aside className="quiz-panel-left">
-          <NaukaLeftPanel
-            screen={screen}
-            configSys={config.sys}
-            progress={progress}
-            stats={stats}
-            onScreenChange={s => {
-              setScreen(s)
-              if (s === 'sesja' && sessionCards.length === 0) startSession()
-            }}
-            onSysSelect={handleSysSelect}
-          />
-        </aside>
-
-        <main className="quiz-center">
-          <div className="quiz-center-inner">
-            {screen === 'tablica' && (
-              <NaukaHome
-                configSys={config.sys}
-                configMode={config.mode}
-                progress={progress}
-                stats={stats}
-                onConfigSysChange={sys => setConfig(prev => ({ ...prev, sys }))}
-                onConfigModeChange={mode => setConfig(prev => ({ ...prev, mode }))}
-                onStart={startSession}
-                onRead={handleRead}
-              />
-            )}
-            {screen === 'sesja' && (
+      {/* 2-column body (v2 design: main + right panel) */}
+      <div className="nauka-v2-body nauka-desktop-only">
+        <main className="nauka-v2-main">
+          {screen === 'tablica' && (
+            <NaukaHome
+              configSys={config.sys}
+              configMode={config.mode}
+              progress={progress}
+              stats={stats}
+              cards={cards}
+              onConfigSysChange={sys => setConfig(prev => ({ ...prev, sys }))}
+              onConfigModeChange={mode => setConfig(prev => ({ ...prev, mode }))}
+              onStart={() => startSession()}
+              onRead={handleRead}
+            />
+          )}
+          {screen === 'sesja' && (
+            <div style={{ maxWidth: 680, margin: '0 auto' }}>
+              <button
+                type="button"
+                onClick={() => { setScreen('tablica'); setPhase('running') }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  marginBottom: 20, background: 'none', border: 'none',
+                  color: '#686864', fontSize: 13, cursor: 'pointer',
+                  fontFamily: "'Manrope', sans-serif", fontWeight: 600,
+                }}
+              >
+                ← Wróć do tablicy
+              </button>
               <NaukaSession
                 cards={sessionCards}
                 cardIdx={cardIdx}
@@ -279,20 +344,34 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
                 onAnswer={handleAnswer}
                 onPauseToggle={() => setIsPaused(p => !p)}
                 onBackToBoard={() => { setScreen('tablica'); setPhase('running') }}
-                onRepeat={startSession}
+                onRepeat={() => startSession()}
               />
-            )}
-            {screen === 'czytaj' && (
+            </div>
+          )}
+          {screen === 'czytaj' && (
+            <div style={{ maxWidth: 680, margin: '0 auto' }}>
+              <button
+                type="button"
+                onClick={() => setScreen('tablica')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  marginBottom: 20, background: 'none', border: 'none',
+                  color: '#686864', fontSize: 13, cursor: 'pointer',
+                  fontFamily: "'Manrope', sans-serif", fontWeight: 600,
+                }}
+              >
+                ← Wróć do tablicy
+              </button>
               <NaukaReading
                 material={readingMaterial}
                 sectionIdx={readSection}
                 onSectionChange={setReadSection}
               />
-            )}
-          </div>
+            </div>
+          )}
         </main>
 
-        <aside className="quiz-panel-right">
+        <aside className="nauka-v2-right">
           <NaukaRightPanel
             screen={screen}
             phase={phase}
@@ -300,6 +379,8 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
             notes={notes}
             stats={stats}
             onNoteChange={handleNoteChange}
+            onStart={() => startSession()}
+            onRead={handleRead}
           />
         </aside>
       </div>

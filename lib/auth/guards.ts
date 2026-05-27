@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from './server'
 import type { UserProfile } from './types'
@@ -51,3 +52,23 @@ export async function requireAdmin(): Promise<UserProfile> {
   if (profile.role !== 'admin') redirect('/')
   return profile
 }
+
+export const getRequireLoginSetting = cache(async (): Promise<boolean> => {
+  try {
+    const supabase = await createSupabaseServerClient()
+    const { data, error } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'require_login')
+      .single()
+    if (error) {
+      console.error('[getRequireLoginSetting] Supabase error:', error.code, error.message)
+      return true
+    }
+    console.log('[getRequireLoginSetting] value:', data?.value)
+    return data?.value !== 'false'
+  } catch (e) {
+    console.error('[getRequireLoginSetting] Exception:', e)
+    return true
+  }
+})

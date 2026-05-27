@@ -1,8 +1,9 @@
-import { requireUser } from '@/lib/auth/guards'
+import { getCurrentUserProfile } from '@/lib/auth/guards'
 import { fetchUserStats } from '@/lib/supabase/nauka'
 
 export async function GET() {
-  const profile = await requireUser()
+  const profile = await getCurrentUserProfile()
+  if (!profile) return Response.json(null)
   try {
     const stats = await fetchUserStats(profile.id)
     return Response.json(stats)

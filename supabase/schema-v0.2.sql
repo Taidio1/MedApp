@@ -874,6 +874,12 @@ on conflict (structure_id, annotation_key) do update set
   accepted_answers = excluded.accepted_answers,
   difficulty = excluded.difficulty;
 
+alter table if exists public.reading_materials
+  add column if not exists illustration_url text;
+
+comment on column public.reading_materials.illustration_url is
+  'Optional URL or public asset path for the reading material illustration.';
+
 commit;
 
 -- After your first admin registers, promote them manually:

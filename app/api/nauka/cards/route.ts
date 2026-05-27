@@ -1,8 +1,9 @@
-import { requireUser } from '@/lib/auth/guards'
+import { getCurrentUserProfile } from '@/lib/auth/guards'
 import { fetchFlashcards } from '@/lib/supabase/nauka'
 
 export async function GET(req: Request) {
-  await requireUser()
+  const profile = await getCurrentUserProfile()
+  if (!profile) return Response.json([])
   const { searchParams } = new URL(req.url)
   const system = searchParams.get('system') ?? undefined
   try {

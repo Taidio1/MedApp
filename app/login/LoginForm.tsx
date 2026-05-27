@@ -88,14 +88,14 @@ export function LoginForm() {
   return (
     <div className="flex flex-col gap-4">
       {/* Tab switcher */}
-      <div className="flex rounded-md overflow-hidden border border-[#2a2a4e]">
+      <div className="flex overflow-hidden rounded-md border border-[var(--line)] bg-[#f9f5ed]">
         <button
           type="button"
           onClick={() => switchMode('login')}
           className={`flex-1 py-2 text-xs font-medium transition-colors ${
             isLogin
-              ? 'bg-[#7c3aed] text-white'
-              : 'bg-transparent text-gray-400 hover:text-white'
+              ? 'bg-[var(--qz-accent)] text-white'
+              : 'bg-transparent text-[var(--muted)] hover:text-[var(--ink)]'
           }`}
         >
           Logowanie
@@ -105,8 +105,8 @@ export function LoginForm() {
           onClick={() => switchMode('register')}
           className={`flex-1 py-2 text-xs font-medium transition-colors ${
             !isLogin
-              ? 'bg-[#7c3aed] text-white'
-              : 'bg-transparent text-gray-400 hover:text-white'
+              ? 'bg-[var(--qz-accent)] text-white'
+              : 'bg-transparent text-[var(--muted)] hover:text-[var(--ink)]'
           }`}
         >
           Rejestracja
@@ -115,19 +115,19 @@ export function LoginForm() {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {error && (
-          <div className="rounded-md bg-red-900/40 border border-red-700 px-4 py-3 text-sm text-red-300">
+          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
 
         {info && (
-          <div className="rounded-md bg-green-900/40 border border-green-700 px-4 py-3 text-sm text-green-300">
+          <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
             {info}
           </div>
         )}
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="email" className="text-xs text-gray-400 uppercase tracking-wide">
+          <label htmlFor="email" className="text-xs uppercase tracking-wide text-[var(--muted)]">
             Email
           </label>
           <input
@@ -137,13 +137,13 @@ export function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="rounded-md bg-[#1e1e3a] border border-[#2a2a4e] px-3 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-[#7c3aed]"
+            className="rounded-md border border-[var(--line)] bg-[#fffaf1] px-3 py-2 text-sm text-[var(--ink)] placeholder:text-[rgba(128,120,109,0.62)] focus:outline-none focus:ring-1 focus:ring-[var(--qz-accent)]"
             placeholder="you@example.com"
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="password" className="text-xs text-gray-400 uppercase tracking-wide">
+          <label htmlFor="password" className="text-xs uppercase tracking-wide text-[var(--muted)]">
             Hasło
           </label>
           <input
@@ -153,14 +153,14 @@ export function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete={isLogin ? 'current-password' : 'new-password'}
-            className="rounded-md bg-[#1e1e3a] border border-[#2a2a4e] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7c3aed]"
+            className="rounded-md border border-[var(--line)] bg-[#fffaf1] px-3 py-2 text-sm text-[var(--ink)] focus:outline-none focus:ring-1 focus:ring-[var(--qz-accent)]"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 rounded-md bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white hover:bg-[#6d28d9] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="mt-2 rounded-md bg-[var(--qz-accent)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading
             ? isLogin ? 'Logowanie…' : 'Rejestrowanie…'

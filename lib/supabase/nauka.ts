@@ -34,6 +34,7 @@ interface DbReadingMaterial {
   sys: string
   title: string
   read_time: number
+  illustration_url: string | null
   reading_sections: DbSection[]
 }
 
@@ -52,9 +53,11 @@ export function mapDbCardToUi(c: DbFlashcard): NaukaCard {
 
 export function mapDbReadingToUi(m: DbReadingMaterial): ReadingMaterial {
   return {
+    id: m.id,
     sys: m.sys,
     title: m.title,
     readTime: m.read_time,
+    illustrationUrl: m.illustration_url,
     sections: (m.reading_sections ?? [])
       .sort((a, b) => a.sort_order - b.sort_order)
       .map(s => ({ id: s.id, title: s.title, content: s.content })),
@@ -79,7 +82,7 @@ export async function fetchReadingMaterials(): Promise<ReadingMaterial[]> {
   const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase
     .from('reading_materials')
-    .select('id, sys, title, read_time, reading_sections(id, title, content, sort_order)')
+    .select('id, sys, title, read_time, illustration_url, reading_sections(id, title, content, sort_order)')
   if (error) throw new Error(error.message)
   return ((data ?? []) as DbReadingMaterial[]).map(mapDbReadingToUi)
 }
@@ -115,7 +118,7 @@ export async function fetchUserStats(userId: string): Promise<UserNaukaStats> {
   const [totalRes, knownRes, sessionsWkRes, completedRes, reviewRes, seenRes] = await Promise.all([
     supabase.from('flashcards').select('*', { count: 'exact', head: true }),
     supabase.from('user_card_progress').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('known', true),
-    supabase.from('study_sessions').select('*', { count: 'exact', head: true }).eq('user_id', userId).gte('started_at', weekAgo),
+    supabase.from('study_sessions').select('started_at').eq('user_id', userId).gte('started_at', weekAgo),
     supabase.from('study_sessions').select('started_at, ended_at').eq('user_id', userId).not('ended_at', 'is', null),
     supabase.from('user_card_progress').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('known', true).lt('last_reviewed_at', dayAgo),
     supabase.from('user_card_progress').select('*', { count: 'exact', head: true }).eq('user_id', userId),
@@ -128,6 +131,13 @@ export async function fetchUserStats(userId: string): Promise<UserNaukaStats> {
     totalStudyMinutes += Math.floor((new Date(end).getTime() - new Date(start).getTime()) / 60000)
   }
 
+  const uniqueActiveDays = new Set(
+    (sessionsWkRes.data ?? []).map(s => {
+      const d = new Date(s.started_at as string)
+      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+    }),
+  )
+
   const total         = totalRes.count ?? 0
   const seen          = seenRes.count ?? 0
   const newCardsToday = Math.min(5, Math.max(0, total - seen))
@@ -136,7 +146,7 @@ export async function fetchUserStats(userId: string): Promise<UserNaukaStats> {
   return {
     totalCards:       total,
     knownCards:       knownRes.count ?? 0,
-    sessionsThisWeek: sessionsWkRes.count ?? 0,
+    sessionsThisWeek: uniqueActiveDays.size,
     totalStudyMinutes,
     cardsToReview:    reviewRes.count ?? 0,
     newCardsToday,

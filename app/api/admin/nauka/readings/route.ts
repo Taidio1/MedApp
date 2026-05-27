@@ -15,7 +15,7 @@ export async function GET() {
     const supabase = await createSupabaseServerClient()
     const { data, error } = await supabase
       .from('reading_materials')
-      .select('id, sys, title, read_time, reading_sections(id, title, content, sort_order)')
+      .select('id, sys, title, read_time, illustration_url, reading_sections(id, title, content, sort_order)')
       .order('sys')
     if (error) throw new Error(error.message)
     return Response.json(data ?? [])
@@ -37,7 +37,12 @@ export async function POST(request: Request) {
     const supabase = await createSupabaseServerClient()
     const { data, error } = await supabase
       .from('reading_materials')
-      .insert({ sys: b.sys as string, title: b.title as string, read_time: b.read_time as number })
+      .insert({
+        sys: b.sys as string,
+        title: b.title as string,
+        read_time: b.read_time as number,
+        illustration_url: typeof b.illustration_url === 'string' && b.illustration_url.trim() ? b.illustration_url.trim() : null,
+      })
       .select()
       .single()
     if (error) throw new Error(error.message)

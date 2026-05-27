@@ -1,8 +1,9 @@
-import { requireUser } from '@/lib/auth/guards'
+import { getCurrentUserProfile } from '@/lib/auth/guards'
 import { fetchUserNotes, upsertUserNote } from '@/lib/supabase/nauka'
 
 export async function GET() {
-  const profile = await requireUser()
+  const profile = await getCurrentUserProfile()
+  if (!profile) return Response.json({})
   try {
     const notes = await fetchUserNotes(profile.id)
     return Response.json(notes)
@@ -13,7 +14,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const profile = await requireUser()
+  const profile = await getCurrentUserProfile()
+  if (!profile) return Response.json({ error: 'Brak autoryzacji' }, { status: 401 })
   const body = await req.json() as { cardId: string; content: string }
 
   if (!body.cardId || typeof body.cardId !== 'string') {

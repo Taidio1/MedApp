@@ -57,6 +57,20 @@ const modes: { id: EditorMode; label: string }[] = [
   { id: 'preview', label: 'Preview' },
 ]
 
+function AdminAnnotationsMobileFallback() {
+  return (
+    <main className="flex min-h-dvh items-center justify-center bg-[var(--app-bg)] p-6 text-[var(--ink)] min-[901px]:hidden">
+      <section className="w-full max-w-[420px] rounded-lg border border-[var(--line)] bg-[var(--paper)] p-6 text-center shadow-[var(--shadow-soft)]">
+        <h1 className="font-serif text-2xl font-medium">Edytor anotacji wymaga ekranu desktopowego</h1>
+        <p className="my-4 text-sm leading-relaxed text-[var(--muted)]">
+          Ten widok korzysta z trzech paneli i canvasu 3D. OtwĂłrz go na ekranie o szerokoĹ›ci co najmniej 900px.
+        </p>
+        <Link href="/admin">WrĂłÄ‡ do panelu admina</Link>
+      </section>
+    </main>
+  )
+}
+
 function annotationToRuntime(
   structureId: string,
   annotation: AnnotationStoreRecord,
@@ -331,14 +345,19 @@ export function AdminAnnotationEditor() {
 
   if (loading) {
     return (
-      <main className="flex h-screen items-center justify-center bg-[#101827] text-slate-300">
+      <>
+      <AdminAnnotationsMobileFallback />
+      <main className="hidden h-screen items-center justify-center bg-[#101827] text-slate-300 min-[901px]:flex">
         Ładowanie edytora anotacji...
       </main>
+      </>
     )
   }
 
   return (
-    <main className="grid h-screen grid-rows-[44px_1fr] overflow-hidden bg-[#101827] text-slate-100">
+    <>
+    <AdminAnnotationsMobileFallback />
+    <main className="hidden h-screen grid-rows-[44px_1fr] overflow-hidden bg-[#101827] text-slate-100 min-[901px]:grid">
       <header className="flex items-center gap-3 border-b border-[#26364f] bg-[#0f172a] px-5">
         <Link
           href="/admin"
@@ -725,6 +744,7 @@ export function AdminAnnotationEditor() {
         </aside>
       </section>
     </main>
+    </>
   )
 }
 

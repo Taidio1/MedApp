@@ -24,30 +24,32 @@ const diffs = ['Wszystkie poziomy', 'Łatwy', 'Średni', 'Trudny']
 
 export function QuizHome({ config, onConfigChange, onStart, onHistory, onLeaderboard }: QuizHomeProps) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 680, margin: '0 auto', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 840, margin: '0 auto', width: '100%' }}>
       {/* Hero */}
-      <div style={{ background: '#fbf7ee', border: '1px solid rgba(91,78,60,0.14)', borderRadius: 10, padding: '28px 32px', boxShadow: '0 8px 26px rgba(78,66,48,0.08)' }}>
+      <div style={{ padding: '8px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 6 }}>
           <div style={{ width: 44, height: 44, borderRadius: 10, background: 'var(--qz-accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>📝</div>
           <div>
-            <h1 style={{ margin: 0, fontSize: 26, fontFamily: '"Libre Baskerville",Georgia,serif', color: '#28231c', fontWeight: 400 }}>Quiz anatomiczny</h1>
-            <p style={{ margin: 0, fontSize: 13, color: '#80786d', fontFamily: 'Inter,sans-serif', fontStyle: 'italic' }}>Sprawdź swoją wiedzę o układach i strukturach</p>
+            <h1 style={{ margin: 0, fontSize: 28, fontFamily: '"Libre Baskerville",Georgia,serif', color: '#28231c', fontWeight: 400 }}>Quiz anatomiczny</h1>
+            <p style={{ margin: 0, fontSize: 14, color: '#80786d', fontFamily: 'Inter,sans-serif', fontStyle: 'italic' }}>Sprawdź swoją wiedzę o układach i strukturach</p>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 16, marginTop: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 16, marginTop: 24, flexWrap: 'wrap' }}>
           {([['5', 'dostępnych pytań'], ['80%', 'ostatni wynik'], ['3', 'sesji w tym tyg.']] as [string, string][]).map(([v, l]) => (
-            <div key={l} style={{ flex: '1 1 100px', background: 'var(--qz-accent-soft)', borderRadius: 8, padding: '10px 14px' }}>
-              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--qz-accent)', fontFamily: 'Inter,sans-serif' }}>{v}</div>
-              <div style={{ fontSize: 11, color: '#80786d', fontFamily: 'Inter,sans-serif' }}>{l}</div>
+            <div key={l} style={{ flex: '1 1 140px', background: 'var(--qz-accent-soft)', borderRadius: 10, padding: '14px 18px', border: '1px solid rgba(124,107,196,0.1)' }}>
+              <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--qz-accent)', fontFamily: 'Inter,sans-serif' }}>{v}</div>
+              <div style={{ fontSize: 12, color: '#80786d', fontFamily: 'Inter,sans-serif', fontWeight: 500 }}>{l}</div>
             </div>
           ))}
         </div>
       </div>
 
+      <div style={{ height: '1px', background: 'var(--line)', margin: '4px 0' }} />
+
       {/* Config */}
-      <div style={{ background: '#fbf7ee', border: '1px solid rgba(91,78,60,0.14)', borderRadius: 10, padding: '22px 24px', boxShadow: '0 8px 26px rgba(78,66,48,0.08)' }}>
+      <div>
         <PanelHeader icon="⚙" title="Konfiguracja quizu" />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+        <div className="quiz-config-grid" style={{ marginTop: 16 }}>
           <div>
             <label style={{ display: 'block', fontSize: 11, color: '#80786d', fontFamily: 'Inter,sans-serif', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Układ anatomiczny</label>
             <select value={config.system} onChange={e => onConfigChange({ system: e.target.value })} style={sel}>
@@ -61,17 +63,17 @@ export function QuizHome({ config, onConfigChange, onStart, onHistory, onLeaderb
             </select>
           </div>
         </div>
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 24, marginTop: 16 }}>
           <label style={{ display: 'block', fontSize: 11, color: '#80786d', fontFamily: 'Inter,sans-serif', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Tryb quizu</label>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 10 }}>
             {(['Nauka', 'Egzamin'] as const).map(m => (
               <button key={m} onClick={() => onConfigChange({ mode: m })}
                 style={{
-                  flex: 1, padding: '9px 0', borderRadius: 8,
+                  flex: 1, padding: '12px 0', borderRadius: 9,
                   border: `1.5px solid ${config.mode === m ? 'var(--qz-accent)' : 'rgba(91,78,60,0.18)'}`,
                   background: config.mode === m ? 'var(--qz-accent-soft)' : '#f1eadc',
                   color: config.mode === m ? 'var(--qz-accent)' : '#80786d',
-                  fontSize: 13, fontWeight: config.mode === m ? 600 : 400, fontFamily: 'Inter,sans-serif', cursor: 'pointer',
+                  fontSize: 14, fontWeight: config.mode === m ? 600 : 400, fontFamily: 'Inter,sans-serif', cursor: 'pointer',
                   transition: 'all 0.18s',
                 }}>
                 {m === 'Nauka' ? '📖 Nauka' : '⏱ Egzamin'}
@@ -79,25 +81,27 @@ export function QuizHome({ config, onConfigChange, onStart, onHistory, onLeaderb
             ))}
           </div>
           {config.mode === 'Egzamin' && (
-            <p style={{ margin: '8px 0 0', fontSize: 12, color: '#80786d', fontFamily: 'Inter,sans-serif' }}>
+            <p style={{ margin: '12px 0 0', fontSize: 13, color: '#80786d', fontFamily: 'Inter,sans-serif' }}>
               Limit czasu: 2 minuty · Bez podpowiedzi · Wynik zapisany do rankingu
             </p>
           )}
         </div>
         <button onClick={onStart} style={{
-          width: '100%', padding: '13px', borderRadius: 9, border: 'none',
-          background: 'var(--qz-accent)', color: '#fff', fontSize: 14, fontWeight: 600,
+          width: '100%', padding: '14px', borderRadius: 10, border: 'none',
+          background: 'var(--qz-accent)', color: '#fff', fontSize: 15, fontWeight: 600,
           fontFamily: 'Inter,sans-serif', cursor: 'pointer', letterSpacing: '0.02em',
-          boxShadow: '0 4px 14px rgba(0,0,0,0.12)', transition: 'opacity 0.18s',
+          boxShadow: '0 4px 14px rgba(124,107,196,0.25)', transition: 'opacity 0.18s',
         }}>Rozpocznij Quiz →</button>
       </div>
 
+      <div style={{ height: '1px', background: 'var(--line)', margin: '4px 0' }} />
+
       {/* History + Leaderboard buttons */}
-      <div style={{ display: 'flex', gap: 12 }}>
+      <div className="quiz-action-row">
         {([['📋 Historia sesji', onHistory], ['🏆 Ranking', onLeaderboard]] as [string, () => void][]).map(([label, fn]) => (
           <button key={label} onClick={fn} style={{
-            flex: 1, padding: '11px', borderRadius: 8, border: '1.5px solid rgba(91,78,60,0.18)',
-            background: '#fbf7ee', color: '#28231c', fontSize: 13, fontFamily: 'Inter,sans-serif',
+            flex: 1, padding: '12px', borderRadius: 9, border: '1.5px solid rgba(91,78,60,0.18)',
+            background: '#fbf7ee', color: '#28231c', fontSize: 14, fontFamily: 'Inter,sans-serif',
             cursor: 'pointer', transition: 'background 0.15s',
           }}>{label}</button>
         ))}

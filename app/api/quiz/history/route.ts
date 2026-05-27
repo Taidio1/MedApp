@@ -1,8 +1,9 @@
-import { requireUser } from '@/lib/auth/guards'
+import { getCurrentUserProfile } from '@/lib/auth/guards'
 import { fetchUserQuizHistory } from '@/lib/supabase/quiz'
 
 export async function GET() {
-  const profile = await requireUser()
+  const profile = await getCurrentUserProfile()
+  if (!profile) return Response.json([])
   try {
     const history = await fetchUserQuizHistory(profile.id)
     return Response.json(history)
