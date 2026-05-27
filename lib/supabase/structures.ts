@@ -6,6 +6,7 @@ import {
   AnnotationPointLayer,
   AnatomyLayer,
 } from '@/lib/types'
+import { PremiumViewer, toPublicAccess } from '@/lib/premiumAccess'
 
 interface LayerRow {
   layer_key: string
@@ -41,6 +42,7 @@ interface StructureRow {
   anatomical_system: string
   description: string
   biological_notes: string
+  is_premium?: boolean | null
   anatomy_layers: LayerRow[]
   annotations: AnnotationRow[]
 }
@@ -104,14 +106,15 @@ function mapAnnotation(row: AnnotationRow, structureId: string): Annotation {
 
 export async function fetchStructures(
   supabase: SupabaseClient,
+  viewer: PremiumViewer | null = null,
 ): Promise<Record<string, AnatomicalStructure>> {
   const selectWithLearningMetadata = `
-      id, name_pl, name_lat, anatomical_system, description, biological_notes,
+      id, name_pl, name_lat, anatomical_system, description, biological_notes, is_premium,
       anatomy_layers (layer_key, label, default_visible, is_pair, split_axis, split_distance, split_direction, explode_offset, base_position, sort_order),
       annotations (annotation_key, label, name_lat, description, position, size, visible, layer_ids, quiz_prompt, accepted_answers, difficulty)
     `
   const selectLegacy = `
-      id, name_pl, name_lat, anatomical_system, description, biological_notes,
+      id, name_pl, name_lat, anatomical_system, description, biological_notes, is_premium,
       anatomy_layers (layer_key, label, default_visible, is_pair, split_axis, split_distance, split_direction, explode_offset, base_position, sort_order),
       annotations (annotation_key, label, name_lat, description, position, size, visible)
     `
@@ -140,6 +143,10 @@ export async function fetchStructures(
   const result: Record<string, AnatomicalStructure> = {}
 
   for (const raw of (data ?? []) as StructureRow[]) {
+    const access = toPublicAccess(
+      { id: raw.id, isPremium: raw.is_premium === true },
+      viewer,
+    )
     const layers = (raw.anatomy_layers ?? [])
       .sort((a, b) => a.sort_order - b.sort_order)
       .map(mapLayer)
@@ -149,10 +156,18 @@ export async function fetchStructures(
       namePL: raw.name_pl,
       nameLAT: raw.name_lat,
       system: raw.anatomical_system,
-      description: raw.description,
-      biologicalNotes: raw.biological_notes,
-      annotations: (raw.annotations ?? []).map((a) => mapAnnotation(a, raw.id)),
-      ...(layers.length > 0 ? { layers } : {}),
+      description: access.isLocked
+        ? 'Ten model jest dostępny w planie Premium.'
+        : raw.description,
+      biologicalNotes: access.isLocked
+        ? 'Kup Premium, aby odblokować model 3D, punkty nauki i quiz dla tego narządu.'
+        : raw.biological_notes,
+      annotations: access.isLocked
+        ? []
+        : (raw.annotations ?? []).map((a) => mapAnnotation(a, raw.id)),
+      isPremium: access.isPremium,
+      isLocked: access.isLocked,
+      ...(!access.isLocked && layers.length > 0 ? { layers } : {}),
     }
   }
 

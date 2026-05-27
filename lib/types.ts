@@ -66,6 +66,8 @@ export interface AnatomicalStructure {
   description: string
   biologicalNotes: string
   annotations: Annotation[]
+  isPremium?: boolean
+  isLocked?: boolean
   /** Warstwy 3D (tylko dla modeli multi-mesh) */
   layers?: AnatomyLayer[]
 }

@@ -112,7 +112,24 @@ export function PanelRight() {
 
   return (
     <aside className="right-rail">
-      {selectedStructure ? (
+      {selectedStructure?.isLocked ? (
+        <section className="details-panel premium-side-lock">
+          <div className="panel-heading">
+            <span>Szczegóły struktury</span>
+            <span aria-hidden="true">Premium</span>
+          </div>
+          <div className="detail-hero">
+            <span className="structure-orb" aria-hidden="true" />
+            <div>
+              <h3>{selectedStructure.namePL}</h3>
+              <p>{selectedStructure.nameLAT}</p>
+            </div>
+          </div>
+          <div className="notes-card">
+            <p>Opis, notatki biologiczne i AI dla tego modelu są dostępne po zakupie Premium.</p>
+          </div>
+        </section>
+      ) : selectedStructure ? (
         <section className="details-panel">
           <div className="panel-heading">
             <span>Szczegóły struktury</span>

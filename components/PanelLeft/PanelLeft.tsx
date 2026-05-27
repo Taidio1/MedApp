@@ -25,6 +25,8 @@ function getStructureBadge(
   const visible = structure.annotations.filter(a => a.visible !== false)
   const total = visible.length
 
+  if (structure.isLocked) return 'Premium'
+
   if (tab === 'study') {
     const remembered = visible.filter(a => rememberedIds.includes(a.id)).length
     return `${remembered}/${total}`
@@ -168,7 +170,11 @@ function TreeNode({
                 <StudyProgressBar structure={structure} rememberedIds={rememberedIds} />
               )}
             </span>
-            <span className={['structure-badge', !hasModel ? 'structure-badge--soon' : ''].join(' ')}>
+            <span className={[
+              'structure-badge',
+              !hasModel ? 'structure-badge--soon' : '',
+              structure?.isLocked ? 'structure-badge--premium' : '',
+            ].join(' ')}>
               {!hasModel
                 ? 'soon'
                 : structure

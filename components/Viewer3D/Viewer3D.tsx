@@ -10,7 +10,7 @@ import { LayerPanel } from './LayerPanel'
 import { Annotations } from './Annotations'
 import { getAnnotationFocusView } from './cameraFocus'
 import { useAppStore } from '@/lib/store'
-import { RotateCcw, Columns, Maximize2, Scissors, RefreshCw, HeartPulse } from 'lucide-react'
+import { RotateCcw, Columns, Maximize2, Scissors, RefreshCw, HeartPulse, Lock, Sparkles } from 'lucide-react'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 
 // ─── Toolbar ─────────────────────────────────────────────────────────────────
@@ -459,13 +459,88 @@ function ViewerWelcome() {
   )
 }
 
+function PremiumLockedViewer() {
+  const selectedStructure = useAppStore((state) => state.selectedStructure)
+  const [isStartingCheckout, setIsStartingCheckout] = useState(false)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
+
+  const handleStartCheckout = async () => {
+    if (isStartingCheckout) return
+
+    setIsStartingCheckout(true)
+    setCheckoutError(null)
+
+    try {
+      const response = await fetch('/api/billing/checkout', { method: 'POST' })
+
+      if (response.status === 401) {
+        window.location.href = '/login'
+        return
+      }
+
+      const data = await response.json() as { url?: string; error?: string }
+      if (!response.ok || !data.url) {
+        throw new Error(data.error ?? 'Nie udało się uruchomić płatności')
+      }
+
+      window.location.href = data.url
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : 'Nie udało się uruchomić płatności')
+      setIsStartingCheckout(false)
+    }
+  }
+
+  return (
+    <main className="stage-panel stage-panel--premium">
+      <div className="stage-title">
+        <div>
+          <h2>{selectedStructure?.namePL ?? 'Model Premium'}</h2>
+          <p>{selectedStructure?.nameLAT ?? 'Dostęp tylko dla Premium'}</p>
+        </div>
+      </div>
+
+      <div className="premium-lock-scene" aria-label="Model premium jest zablokowany">
+        <div className="premium-model-blur" aria-hidden="true">
+          <div className="premium-lung-shape premium-lung-shape--left" />
+          <div className="premium-lung-shape premium-lung-shape--right" />
+          <div className="premium-lung-trachea" />
+        </div>
+
+        <section className="premium-lock-card">
+          <div className="premium-lock-icon" aria-hidden="true">
+            <Lock size={20} />
+          </div>
+          <p className="premium-kicker">Premium</p>
+          <h3>Odblokuj model płuc</h3>
+          <p>
+            Dostęp do lung.glb, punktów nauki i quizu dla układu oddechowego.
+            Plan testowy: 1 zł / miesiąc.
+          </p>
+          <button
+            type="button"
+            className="premium-buy-button"
+            onClick={handleStartCheckout}
+            disabled={isStartingCheckout}
+          >
+            <Sparkles size={16} />
+            {isStartingCheckout ? 'Przekierowanie...' : 'Kup Premium za 1 zł / mies.'}
+          </button>
+          {checkoutError && (
+            <p className="premium-checkout-error">{checkoutError}</p>
+          )}
+        </section>
+      </div>
+    </main>
+  )
+}
+
 export function Viewer3D() {
   const { selectedStructure, autoRotate, clippingPlaneY } = useAppStore()
   const controlsRef = useRef<OrbitControlsImpl | null>(null)
   const [heartBeating, setHeartBeating] = useState(false)
 
   const modelUrl = selectedStructure
-    ? `/models/${selectedStructure.id}.glb`
+    ? `/api/models/${selectedStructure.id}`
     : null
 
   const hasLayers = !!(selectedStructure?.layers?.length)
@@ -481,6 +556,10 @@ export function Viewer3D() {
         <ViewerWelcome />
       </main>
     )
+  }
+
+  if (selectedStructure?.isLocked) {
+    return <PremiumLockedViewer />
   }
 
   return (

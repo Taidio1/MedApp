@@ -31,7 +31,7 @@ export default async function ProfileRoute() {
   if (!profile) {
     return (
       <ProfilePage
-        profile={{ id: '', email: '', displayName: null, avatarUrl: null, role: 'user' }}
+        profile={{ id: '', email: '', displayName: null, avatarUrl: null, role: 'user', premiumUntil: null }}
         learningStats={null}
         quizHistory={[]}
         quizSummary={EMPTY_QUIZ_SUMMARY}

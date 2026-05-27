@@ -6,4 +6,5 @@ export interface UserProfile {
   displayName: string | null
   avatarUrl: string | null
   role: AppRole
+  premiumUntil: string | null
 }

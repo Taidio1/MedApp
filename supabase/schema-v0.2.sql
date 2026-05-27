@@ -86,7 +86,17 @@ stable
 security definer
 set search_path = public
 as $$
-  select coalesce(public.current_user_role() in ('premiumUser', 'admin'), false)
+  select coalesce(
+    public.current_user_role() = 'admin'
+    or exists (
+      select 1
+      from public.users
+      where id = (select auth.uid())
+        and role = 'premiumUser'
+        and (premium_until is null or premium_until > now())
+    ),
+    false
+  )
 $$;
 
 create or replace function public.can_access_content(required_access public.content_access_level)
@@ -740,7 +750,7 @@ insert into public.anatomy_structures (
     'Płuco prawe ma 3 płaty, lewe 2 płaty. Powierzchnia wymiany gazowej wynosi około 70 m2.',
     '/models/lung.glb',
     80,
-    false,
+    true,
     true
   ),
   (

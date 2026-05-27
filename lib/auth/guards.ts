@@ -9,6 +9,7 @@ interface UsersRow {
   display_name: string | null
   avatar_url: string | null
   role: 'user' | 'admin' | 'premiumUser'
+  premium_until: string | null
 }
 
 export async function getCurrentUserProfile(): Promise<UserProfile | null> {
@@ -23,7 +24,7 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
 
   const { data, error: profileError } = await supabase
     .from('users')
-    .select('id, email, display_name, avatar_url, role')
+    .select('id, email, display_name, avatar_url, role, premium_until')
     .eq('id', user.id)
     .single()
 
@@ -37,6 +38,7 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
     displayName: row.display_name,
     avatarUrl: row.avatar_url,
     role: row.role,
+    premiumUntil: row.premium_until,
   }
 }
 

@@ -18,6 +18,15 @@ function EmptyLearningPanel() {
   )
 }
 
+function LockedLearningPanel() {
+  return (
+    <div className="empty-state premium-learning-lock">
+      <h2>Material Premium</h2>
+      <p>Punkty nauki i quiz dla tego modelu odblokowują się po zakupie Premium.</p>
+    </div>
+  )
+}
+
 export function PanelBottom() {
   const selectedStructure = useAppStore((state) => state.selectedStructure)
   const structures = useAppStore((state) => state.structures)
@@ -75,6 +84,8 @@ export function PanelBottom() {
       <div className="learning-map-panel">
         {!selectedStructure ? (
           <EmptyLearningPanel />
+        ) : selectedStructure.isLocked ? (
+          <LockedLearningPanel />
         ) : (
           <>
             <div className="panel-heading">
