@@ -1,8 +1,21 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import {
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Info,
+  LockKeyhole,
+  LogIn,
+  Mail,
+  User,
+  UserPlus,
+  X,
+} from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/auth/browser'
+import styles from './login.module.css'
 
 type Mode = 'login' | 'register'
 
@@ -26,18 +39,30 @@ function translateError(message: string, mode: Mode): string {
 }
 
 export function LoginForm() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
+  const [showHint, setShowHint] = useState(true)
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+
+  useEffect(() => {
+    setMode(searchParams.get('tab') === 'register' ? 'register' : 'login')
+  }, [searchParams])
 
   function switchMode(next: Mode) {
     setMode(next)
     setError(null)
     setInfo(null)
+  }
+
+  function showPasswordResetNotice() {
+    setError(null)
+    setInfo('Reset hasła nie jest jeszcze podłączony. Skontaktuj się z administratorem.')
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -62,7 +87,6 @@ export function LoginForm() {
       return
     }
 
-    // register
     const { data, error: signUpError } = await supabase.auth.signUp({ email, password })
 
     if (signUpError) {
@@ -71,14 +95,12 @@ export function LoginForm() {
       return
     }
 
-    // If session is present the project has auto-confirm enabled → redirect immediately
     if (data.session) {
       router.push('/')
       router.refresh()
       return
     }
 
-    // Otherwise email confirmation is required
     setInfo('Konto zostało utworzone. Sprawdź skrzynkę email i potwierdź konto, a następnie zaloguj się.')
     setLoading(false)
   }
@@ -86,87 +108,137 @@ export function LoginForm() {
   const isLogin = mode === 'login'
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Tab switcher */}
-      <div className="flex rounded-md overflow-hidden border border-[#2a2a4e]">
+    <section className={styles.authCard} aria-label="Panel logowania">
+      <div className={styles.tabs} role="tablist" aria-label="Wybierz tryb">
         <button
           type="button"
+          role="tab"
+          aria-selected={isLogin}
           onClick={() => switchMode('login')}
-          className={`flex-1 py-2 text-xs font-medium transition-colors ${
-            isLogin
-              ? 'bg-[#7c3aed] text-white'
-              : 'bg-transparent text-gray-400 hover:text-white'
-          }`}
+          className={isLogin ? styles.activeTab : undefined}
         >
-          Logowanie
+          <User size={34} strokeWidth={1.8} aria-hidden="true" />
+          <span>Logowanie</span>
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={!isLogin}
           onClick={() => switchMode('register')}
-          className={`flex-1 py-2 text-xs font-medium transition-colors ${
-            !isLogin
-              ? 'bg-[#7c3aed] text-white'
-              : 'bg-transparent text-gray-400 hover:text-white'
-          }`}
+          className={!isLogin ? styles.activeTab : undefined}
         >
-          Rejestracja
+          <UserPlus size={36} strokeWidth={1.65} aria-hidden="true" />
+          <span>Rejestracja</span>
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {error && (
-          <div className="rounded-md bg-red-900/40 border border-red-700 px-4 py-3 text-sm text-red-300">
-            {error}
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <label className={styles.fieldGroup} htmlFor="email">
+          <span>Email</span>
+          <div className={styles.inputShell}>
+            <Mail size={34} strokeWidth={1.6} aria-hidden="true" />
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              placeholder="Wpisz swój adres email"
+            />
           </div>
-        )}
+        </label>
 
-        {info && (
-          <div className="rounded-md bg-green-900/40 border border-green-700 px-4 py-3 text-sm text-green-300">
-            {info}
-          </div>
-        )}
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="email" className="text-xs text-gray-400 uppercase tracking-wide">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-            className="rounded-md bg-[#1e1e3a] border border-[#2a2a4e] px-3 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-[#7c3aed]"
-            placeholder="you@example.com"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="password" className="text-xs text-gray-400 uppercase tracking-wide">
+        <label className={styles.fieldGroup} htmlFor="password">
+          <span className={styles.passwordLabel}>
             Hasło
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete={isLogin ? 'current-password' : 'new-password'}
-            className="rounded-md bg-[#1e1e3a] border border-[#2a2a4e] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#7c3aed]"
-          />
+            {isLogin && (
+              <button type="button" onClick={showPasswordResetNotice}>
+                Zapomniałeś hasła?
+              </button>
+            )}
+          </span>
+          <div className={styles.inputShell}>
+            <LockKeyhole size={34} strokeWidth={1.6} aria-hidden="true" />
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
+              placeholder={isLogin ? 'Wpisz swoje hasło' : 'Utwórz hasło'}
+            />
+            <button
+              type="button"
+              className={styles.eyeButton}
+              onClick={() => setShowPassword((value) => !value)}
+              aria-label={showPassword ? 'Ukryj hasło' : 'Pokaż hasło'}
+            >
+              {showPassword ? <EyeOff size={34} strokeWidth={1.6} /> : <Eye size={34} strokeWidth={1.6} />}
+            </button>
+          </div>
+        </label>
+
+        <button type="submit" disabled={loading} className={styles.submitButton}>
+          <LogIn size={34} strokeWidth={1.8} aria-hidden="true" />
+          <span>
+            {loading
+              ? isLogin ? 'Logowanie...' : 'Rejestrowanie...'
+              : isLogin ? 'Zaloguj się' : 'Zarejestruj się'}
+          </span>
+        </button>
+
+        <div className={styles.divider}>
+          <span>lub kontynuuj z</span>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-2 rounded-md bg-[#7c3aed] px-4 py-2 text-sm font-semibold text-white hover:bg-[#6d28d9] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {loading
-            ? isLogin ? 'Logowanie…' : 'Rejestrowanie…'
-            : isLogin ? 'Zaloguj się' : 'Zarejestruj się'}
-        </button>
+        <div className={styles.socialGrid}>
+          <button type="button" aria-label="Kontynuuj z Google">
+            <span className={styles.googleMark} aria-hidden="true">G</span>
+            <span>Google</span>
+          </button>
+          <button type="button" aria-label="Kontynuuj z Apple">
+            <span className={styles.appleMark} aria-hidden="true" />
+            <span>Apple</span>
+          </button>
+        </div>
+
+        <p className={styles.modeHint}>
+          {isLogin ? 'Nie masz konta?' : 'Masz już konto?'}{' '}
+          <button type="button" onClick={() => switchMode(isLogin ? 'register' : 'login')}>
+            {isLogin ? 'Przejdź do rejestracji' : 'Przejdź do logowania'}
+          </button>
+        </p>
+
+        {(showHint || info) && (
+          <div className={`${styles.notice} ${styles.infoNotice}`} role="status">
+            <Info size={32} strokeWidth={2.1} aria-hidden="true" />
+            <div>
+              <strong>{info ? 'Informacja' : 'Przykład informacji'}</strong>
+              <p>{info ?? 'Twoje postępy w nauce są bezpiecznie synchronizowane w chmurze.'}</p>
+            </div>
+            {!info && (
+              <button type="button" onClick={() => setShowHint(false)} aria-label="Zamknij informację">
+                <X size={36} strokeWidth={1.6} aria-hidden="true" />
+              </button>
+            )}
+          </div>
+        )}
+
+        {error && (
+          <div className={`${styles.notice} ${styles.errorNotice}`} role="alert">
+            <AlertCircle size={32} strokeWidth={2.1} aria-hidden="true" />
+            <div>
+              <strong>Błąd logowania</strong>
+              <p>{error}</p>
+            </div>
+            <button type="button" onClick={() => setError(null)} aria-label="Zamknij błąd">
+              <X size={36} strokeWidth={1.6} aria-hidden="true" />
+            </button>
+          </div>
+        )}
       </form>
-    </div>
+    </section>
   )
 }
