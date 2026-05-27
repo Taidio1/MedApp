@@ -11,6 +11,7 @@ export default async function NaukaRoute() {
   return (
     <NaukaPage
       displayName={profile?.displayName ?? null}
+      email={profile?.email ?? null}
       isAdmin={profile?.role === 'admin'}
     />
   )

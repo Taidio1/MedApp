@@ -15,6 +15,7 @@ import { NaukaMobileHome } from './NaukaMobileHome'
 
 interface NaukaPageProps {
   displayName: string | null
+  email: string | null
   isAdmin: boolean
 }
 
@@ -26,7 +27,7 @@ const NOTE_DEBOUNCE   = 1500
 
 const NK = '#2a7a60'
 
-export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
+export function NaukaPage({ displayName, email, isAdmin }: NaukaPageProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [screen, setScreen]             = useState<NaukaScreen>('tablica')
@@ -224,7 +225,7 @@ export function NaukaPage({ displayName, isAdmin }: NaukaPageProps) {
 
   return (
     <div className="quiz-shell app-shell-with-navbar" style={shellStyle}>
-      <AppNavbar active="nauka" displayName={displayName} isAdmin={isAdmin} />
+      <AppNavbar active="nauka" displayName={displayName} email={email} isAdmin={isAdmin} />
 
       {screen === 'tablica' ? (
         <NaukaMobileHome

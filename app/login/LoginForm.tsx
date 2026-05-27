@@ -46,12 +46,17 @@ export function LoginForm() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
-  const [showHint, setShowHint] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [oauthLoading, setOauthLoading] = useState(false)
 
   useEffect(() => {
     setMode(searchParams.get('tab') === 'register' ? 'register' : 'login')
+
+    if (searchParams.get('error') === 'oauth') {
+      setError('Nie udało się zalogować przez Google. Spróbuj ponownie.')
+      setInfo(null)
+    }
   }, [searchParams])
 
   function switchMode(next: Mode) {
@@ -103,6 +108,25 @@ export function LoginForm() {
 
     setInfo('Konto zostało utworzone. Sprawdź skrzynkę email i potwierdź konto, a następnie zaloguj się.')
     setLoading(false)
+  }
+
+  async function handleGoogleSignIn() {
+    setOauthLoading(true)
+    setError(null)
+    setInfo(null)
+
+    const supabase = createSupabaseBrowserClient()
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+
+    if (oauthError) {
+      setError('Nie udało się rozpocząć logowania przez Google. Spróbuj ponownie.')
+      setOauthLoading(false)
+    }
   }
 
   const isLogin = mode === 'login'
@@ -180,7 +204,7 @@ export function LoginForm() {
           </div>
         </label>
 
-        <button type="submit" disabled={loading} className={styles.submitButton}>
+        <button type="submit" disabled={loading || oauthLoading} className={styles.submitButton}>
           <LogIn size={34} strokeWidth={1.8} aria-hidden="true" />
           <span>
             {loading
@@ -194,12 +218,22 @@ export function LoginForm() {
         </div>
 
         <div className={styles.socialGrid}>
-          <button type="button" aria-label="Kontynuuj z Google">
+          <button
+            type="button"
+            aria-label="Kontynuuj z Google"
+            onClick={handleGoogleSignIn}
+            disabled={loading || oauthLoading}
+          >
             <span className={styles.googleMark} aria-hidden="true">G</span>
-            <span>Google</span>
+            <span>{oauthLoading ? 'Łączenie...' : 'Google'}</span>
           </button>
           <button type="button" aria-label="Kontynuuj z Apple">
-            <span className={styles.appleMark} aria-hidden="true" />
+            <svg className={styles.appleLogo} viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"
+              />
+            </svg>
             <span>Apple</span>
           </button>
         </div>
@@ -211,18 +245,13 @@ export function LoginForm() {
           </button>
         </p>
 
-        {(showHint || info) && (
+        {info && (
           <div className={`${styles.notice} ${styles.infoNotice}`} role="status">
             <Info size={32} strokeWidth={2.1} aria-hidden="true" />
             <div>
-              <strong>{info ? 'Informacja' : 'Przykład informacji'}</strong>
-              <p>{info ?? 'Twoje postępy w nauce są bezpiecznie synchronizowane w chmurze.'}</p>
+              <strong>Informacja</strong>
+              <p>{info}</p>
             </div>
-            {!info && (
-              <button type="button" onClick={() => setShowHint(false)} aria-label="Zamknij informację">
-                <X size={36} strokeWidth={1.6} aria-hidden="true" />
-              </button>
-            )}
           </div>
         )}
 

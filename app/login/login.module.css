@@ -457,36 +457,11 @@
   color: transparent;
 }
 
-.appleMark {
-  position: relative;
-  width: 21px;
-  height: 25px;
-  display: inline-block;
-  border-radius: 46% 46% 48% 48%;
-  background: #050505;
-}
-
-.appleMark::before {
-  position: absolute;
-  top: -8px;
-  left: 11px;
-  width: 10px;
-  height: 14px;
-  content: "";
-  border-radius: 90% 10% 90% 10%;
-  background: #050505;
-  transform: rotate(35deg);
-}
-
-.appleMark::after {
-  position: absolute;
-  top: 7px;
-  right: -4px;
-  width: 9px;
-  height: 12px;
-  content: "";
-  border-radius: 50%;
-  background: #fffdf8;
+.appleLogo {
+  width: 24px;
+  height: 24px;
+  color: #050505;
+  flex: 0 0 auto;
 }
 
 .modeHint {

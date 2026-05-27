@@ -23,6 +23,7 @@ import { ExplorerNavBanner } from './ExplorerNavBanner'
 
 interface QuizPageProps {
   displayName: string | null
+  email: string | null
   isAdmin: boolean
   userId: string
 }
@@ -36,7 +37,7 @@ interface ExplorerContext {
   sys: string
 }
 
-export function QuizPage({ displayName, isAdmin, userId }: QuizPageProps) {
+export function QuizPage({ displayName, email, isAdmin, userId }: QuizPageProps) {
   const [screen, setScreen] = useState<Screen>('home')
   const [questions, setQuestions] = useState<QuizQuestion[]>([])
   const [loadingQuestions, setLoadingQuestions] = useState(true)
@@ -194,7 +195,7 @@ export function QuizPage({ displayName, isAdmin, userId }: QuizPageProps) {
 
   return (
     <div className="quiz-shell app-shell-with-navbar">
-      <AppNavbar active="quiz" displayName={displayName} isAdmin={isAdmin} />
+      <AppNavbar active="quiz" displayName={displayName} email={email} isAdmin={isAdmin} />
 
       {/* Header */}
       <header className="quiz-header quiz-legacy-header">

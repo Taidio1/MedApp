@@ -15,6 +15,7 @@
     "verify:deploy-routing": "node scripts/verify-deploy-routing.mjs",
     "verify:auth-admin": "node scripts/verify-auth-admin.mjs",
     "verify:ai-suggest": "node scripts/verify-ai-suggest.mjs",
+    "verify:auth-navbar": "node scripts/verify-auth-navbar.mjs",
     "verify:profile-page": "node scripts/verify-profile-page.mjs",
     "verify:nauka-materials": "node scripts/verify-nauka-materials.mjs",
     "verify:ui-design": "node scripts/verify-ui-design.mjs",
