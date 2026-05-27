@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { createSupabaseBrowserClient } from '@/lib/auth/browser'
+import { SignOutButton } from '@/components/UserMenu/SignOutButton'
 
 interface UserMenuProps {
   email: string
@@ -11,15 +10,6 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ email, displayName, isAdmin }: UserMenuProps) {
-  const router = useRouter()
-
-  async function handleSignOut() {
-    const supabase = createSupabaseBrowserClient()
-    await supabase.auth.signOut()
-    router.push('/login')
-    router.refresh()
-  }
-
   return (
     <div className="user-menu">
       <span className="user-menu-name">
@@ -35,12 +25,7 @@ export function UserMenu({ email, displayName, isAdmin }: UserMenuProps) {
         </Link>
       )}
 
-      <button
-        onClick={handleSignOut}
-        className="user-menu-button"
-      >
-        Wyloguj
-      </button>
+      <SignOutButton className="user-menu-button" />
     </div>
   )
 }

@@ -5,12 +5,14 @@ import {
   Clock3,
   GraduationCap,
   House,
+  LogOut,
   Mail,
   ShieldCheck,
   Trophy,
   UserRound,
 } from 'lucide-react'
 import { AppNavbar } from '@/components/AppNavbar/AppNavbar'
+import { SignOutButton } from '@/components/UserMenu/SignOutButton'
 import type { QuizHistoryEntry } from '@/components/Quiz/quizData'
 import type { UserProfile } from '@/lib/auth/types'
 import type { UserNaukaStats } from '@/lib/supabase/nauka'
@@ -203,7 +205,12 @@ export function ProfilePage({ profile, learningStats, quizHistory, quizSummary }
                 </div>
                 <div>
                   <dt>Wylogowanie</dt>
-                  <dd>Dostępne w menu użytkownika w nagłówku.</dd>
+                  <dd>
+                    <SignOutButton className="profile-sign-out-button">
+                      <LogOut size={17} strokeWidth={1.9} aria-hidden="true" />
+                      <span>Wyloguj</span>
+                    </SignOutButton>
+                  </dd>
                 </div>
               </dl>
             </section>

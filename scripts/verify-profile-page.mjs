@@ -13,12 +13,16 @@ function read(path) {
 
 const checks = [
   {
-    path: 'app/profil/page.tsx',
-    patterns: ['requireUser', 'fetchUserStats', 'fetchUserQuizHistory', 'fetchUserQuizSummary', '<ProfilePage'],
+    path: 'app/(gated)/profil/page.tsx',
+    patterns: ['getCurrentUserProfile', 'fetchUserStats', 'fetchUserQuizHistory', 'fetchUserQuizSummary', '<ProfilePage'],
   },
   {
     path: 'components/Profile/ProfilePage.tsx',
-    patterns: ['profile-shell', 'AppNavbar', 'active="profil"', 'AdminToolsPanel', 'Brak ukończonych quizów'],
+    patterns: ['profile-shell', 'AppNavbar', 'active="profil"', 'AdminToolsPanel', 'SignOutButton', 'profile-sign-out-button'],
+  },
+  {
+    path: 'components/UserMenu/SignOutButton.tsx',
+    patterns: ['createSupabaseBrowserClient', 'supabase.auth.signOut', "router.push('/login')"],
   },
   {
     path: 'components/Profile/ProfileMetricGrid.tsx',
@@ -38,7 +42,7 @@ const checks = [
   },
   {
     path: 'app/globals.css',
-    patterns: ['.profile-shell', '.profile-card', '.profile-admin-tools', '.profile-metric-grid'],
+    patterns: ['.profile-shell', '.profile-card', '.profile-admin-tools', '.profile-metric-grid', '.profile-sign-out-button'],
   },
 ]
 

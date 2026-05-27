@@ -3121,7 +3121,8 @@ a {
   transition: background 160ms ease, color 160ms ease, transform 160ms ease;
 }
 
-.profile-action-list a:hover {
+.profile-action-list a:hover,
+.profile-sign-out-button:hover {
   transform: translateY(-1px);
   background: var(--accent-soft);
   color: var(--accent);
@@ -3152,6 +3153,23 @@ a {
   color: var(--ink);
   font-size: 0.9rem;
   overflow-wrap: anywhere;
+}
+
+.profile-sign-out-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 13px;
+  cursor: pointer;
+  border: 1px solid rgba(91, 78, 60, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.38);
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 800;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
 }
 
 .profile-admin-tools {
